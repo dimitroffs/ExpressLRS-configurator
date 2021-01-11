@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>ExpressLRS Configurator</title>
+    <!-- <link rel="stylesheet" href="index.css"> -->
+  </head>
+  <header>
+    <img src="../assets/banner.png" width="874" height="300">
+  </header>
+  <body>
+    <label for="binding-phrase">My binding phrase:</label>
+    <input type="text" id="binding-phrase" name="binding-phrase" value="default ExpressLRS binding phrase">
+
+    <h2>Regulatory domain:</h2>
+    <input type="radio" id="Domain-AU-915" name="Regulatory-Domain" value="Regulatory-Domain-AU-915">
+    <label for="male">Regulatory-Domain-AU-915</label>
+    <input type="radio" id="Domain-EU-868" name="Regulatory-Domain" value="Regulatory-Domain-EU-868">
+    <label for="Domain-EU-868">Regulatory-Domain-EU-868</label>
+    <input type="radio" id="Domain-AU-433" name="Regulatory-Domain" value="Regulatory-Domain-AU-433">
+    <label for="other">Regulatory-Domain-AU-433</label>
+    <input type="radio" id="Domain-EU-433" name="Regulatory-Domain" value="Regulatory-Domain-EU-433">
+    <label for="Domain-EU-433">Regulatory-Domain-EU-433</label>
+    <input type="radio" id="Domain-FCC-915" name="Regulatory-Domain" value="Regulatory-Domain-FCC-915">
+    <label for="Domain-FCC-915">Regulatory-Domain-FCC-915</label>
+    <input type="radio" id="Domain-ISM-2400" name="Regulatory-Domain" value="Regulatory-Domain-ISM-2400">
+    <label for="Domain-ISM-2400">Regulatory-Domain-ISM-2400</label>
+
+    <h2>SWITCHES</h2>
+    <input type="checkbox" id="Hybrid switches" name="hybrid switches" value="Use hybrid switches">
+    <label for="Hybrid switches">Use hybrid switches</label>
+
+    <h2>PERFORMANCE OPTIONS</h2>
+    <input type="checkbox" id="Fast sync" name="Fast sync" value="Fast sync" checked>
+    <label for="Fast sync">Fast sync</label>
+    <input type="checkbox" id="unlock higher power" name="R9M Tx" value="R9M Tx unlock higher power">
+    <label for="unlock higher power">R9M Tx unlock higher power</label>
+    <input type="checkbox" id="No sync on arm" name="No sync on arm" value="No sync on arm">
+    <label for="No sync on arm">No sync on arm</label>
+    <input type="checkbox" id="AUX1" name="AUX1" value="AUX1 as arm channel">
+    <label for="AUX1">AUX1 as arm channel</label>
+    <input type="checkbox" id="OpenTX sync" name="OpenTX sync" value="OpenTX sync" checked>
+    <label for="OpenTX sync">OpenTX sync</label>
+    <input type="checkbox" id="sync autotune" name="autotune" value="OpenTX sync autotune">
+    <label for="Sync autotune">OpenTX sync autotune</label>
+    <input type="checkbox" id="first connection" name="first connection" value="Lock on first connection">
+    <label for="first connection">Lock on first connection</label>
+    <input type="checkbox" id="Lock on 50 Hz" name="Lock on 50 Hz" value="Lock on 50 Hz">
+    <label for="Lock on 50 Hz">Use hybrid switches</label>
+
+    <h2>COMPATIBILITY OPTIONS</h2>
+    <input type="checkbox" id="UART inverted" name="UART inverted" value="UART inverted" checked>
+    <label for="UART inverted">UART inverted</label>
+    <input type="checkbox" id="R9MM/R9MINI" name="R9MM/R9MINI" value="Use R9MM/R9MINI SBUS">
+    <label for="R9MM/R9MINI">Use R9MM/R9MINI SBUS</label>
+
+    <h2>OTHER OPTIONS</h2>
+    <input type="checkbox" id="Auto WiFi" name="Auto WiFi" value="Auto WiFi on boot" checked>
+    <label for="Auto WiFi">Auto WiFi on boot</label>
+    <input type="checkbox" id="ESP8266 backpack" name="ESP8266 backpack" value="Use ESP8266 backpack">
+    <label for="ESP8266 backpack">Use ESP8266 backpack</label>
+    <input type="checkbox" id="Just beep once" name="Just beep once" value="Just beep once">
+    <label for="Just beep once">Just beep once</label>
+    <input type="checkbox" id="My melody" name="My startup melody" value="My startup melody">
+    <label for="My melody">My startup melody</label>
+    <input type="checkbox" id="Use 500 Hz" name="Use 500 Hz" value="Use 500 Hz">
+    <label for="Use 500 Hz">Use 500 Hz</label>
+    <input type="text" id="melody" name="my melody" value="B5 16 P16 B5 16 P16 B5 16 P16 B5 2 G5 2 A5 2 B5 8 P4 A5 8 B5 1|140|-3">
+
+    <input type="submit" value="Build ExpressLRS Firmware">
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>

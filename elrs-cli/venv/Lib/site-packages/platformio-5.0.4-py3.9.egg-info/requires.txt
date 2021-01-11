@@ -1,0 +1,9 @@
+bottle<0.13
+click!=7.1,!=7.1.1,<8,>=5
+colorama
+pyserial!=3.3,<4,>=3
+requests<3,>=2.4.0
+semantic_version<3,>=2.8.1
+tabulate<1,>=0.8.3
+pyelftools<1,>=0.25
+marshmallow>=2
