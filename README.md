@@ -5,7 +5,8 @@ A simple way to build and flash https://github.com/AlessandroAU/ExpressLRS firmw
 ### How to try it out:
  - clone project locally
  - run 'npm install' from main project directory
- - in 'elrs-cli/' directory modify pyvenv.cfg to match your python environment
+ - 'elrs-cli/' directory is basic python project with virtualenv interpreter. Setup locally using PyCharm or cli so directory contains all needed libs and executable scripts:
+  - pip, gitpython, yaspin, platformio
  - run 'npm start' to start application
 
 ### Currently under the hood:
