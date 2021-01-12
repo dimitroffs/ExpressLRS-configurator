@@ -90,8 +90,7 @@ out/
 
 # elrs-cli
 elrs-cli/.idea
-elrs-cli/venv/Lib/
-elrs-cli/venv/Scripts/__pycache__/
+elrs-cli/venv
 
 # ExpressLRS repo
 ExpressLRS/

@@ -84,6 +84,16 @@ ipcMain.handle('build-elrs-selected-target', (e, target) => {
   mainWindow.webContents.send('elrs-build-started', target)
 })
 
+ipcMain.handle('upload-elrs-selected-target', (e, target) => {
+  console.log('Selected [%s] target for uploading ExpressLRS firmware. Starting upload process.', target)
+
+  // upload ExpressLRS target
+  uploadElrsFirmwareForTarget(target)
+
+  // send event for successful start of upload
+  mainWindow.webContents.send('elrs-upload-started', target)
+})
+
 const localElrsDir = "./ExpressLRS/"
 function needElrsGithubRepoClone() {
   if (!fs.existsSync(localElrsDir)) {
@@ -157,6 +167,7 @@ const buildElrsFirmwareForTarget = (target) => {
         // send event for successfully finished target build
         mainWindow.webContents.send('elrs-build-success', target)
       }
+      // TODO: handle error cases
     });
   }
 }
@@ -178,6 +189,13 @@ const uploadElrsFirmwareForTarget = (target) => {
 
     uploadElrsFirmwareProcess.on('exit', (code) => {
       console.log('Uploading ExpressLRS firmware for target %s has completed. Exit code: %s', target, code);
+
+      // if execute code successful - send event for successful upload done
+      if (Number(0) === Number(code)) {
+        // send event for successfully finished target upload
+        mainWindow.webContents.send('elrs-upload-success', target)
+      }
+      //TODO: handle error cases
     });
   }
 }

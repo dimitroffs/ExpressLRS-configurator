@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>ExpressLRS Configurator</title>
-    <!-- <link rel="stylesheet" href="index.css"> -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <header>
     <img src="../assets/banner.png" width="874" height="300">
@@ -110,6 +110,10 @@
   
     <div>
       <input type="button" id="elrs-build-target-btn" value="Build target">
+    </div>
+
+    <div>
+      <input type="button" id="elrs-upload-target-btn" value="Upload target" class="invisible">
     </div>
 
     <script src="./renderer.js"></script>
