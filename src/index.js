@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+const { app, globalShortcut, BrowserWindow, Menu, ipcMain } = require('electron')
 const path = require('path')
 const fs = require("fs");
 const menu = require('./menu')
@@ -14,7 +14,7 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 890,
-    height: 605,
+    height: 730,
     webPreferences: {
       nodeIntegration: true
     }
@@ -37,16 +37,18 @@ const createWindow = () => {
     // just update local ExpressLRS repository with latest changes from master
     pullElrsGithubRepo();
   }
-
-  // TODO: move this to action events
-  // buildElrsFirmwareForTarget("Jumper_RX_R900MINI_via_BetaflightPassthrough")
-  // uploadElrsFirmwareForTarget("Jumper_RX_R900MINI_via_BetaflightPassthrough")
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => {
+  globalShortcut.register('Alt+CommandOrControl+C', () => {
+    mainWindow.webContents.send('toggle-elrs-console')
+  })
+
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

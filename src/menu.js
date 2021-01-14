@@ -11,18 +11,25 @@ const menu = [
             {
                 label: 'Pull ExpressLRS repository',
                 click(item, mainWindow) { mainWindow.webContents.send('pull-elrs-repo') }
-            },
-            {
-                label: 'TODO',
-                accelerator: process.platform == 'darwin' ? 'Command+C' : 'Ctrl+C',
-                click(item, mainWindow) { mainWindow.webContents.send('quit') }
             }
         ]
     },
     {
-        label: 'DevTools',
-        accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
-        click(item, mainWindow) { mainWindow.toggleDevTools() }
+        label: 'Tools',
+        submenu: [
+            {
+                label: 'Toggle Console',
+                accelerator: process.platform === 'darwin' ? 'Alt+Command+C' : 'Alt+Ctrl+C',
+                click(item, mainWindow) { mainWindow.webContents.send('toggle-elrs-console') }
+            },
+            {
+                label: 'Toggle DevTools',
+                //accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I', TODO!!!
+                click(item, mainWindow) { mainWindow.toggleDevTools() }
+            }
+        ]
+
+        
     },
     {
         label: 'Help',

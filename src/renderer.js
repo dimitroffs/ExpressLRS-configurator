@@ -2,6 +2,8 @@ const { shell, ipcRenderer } = require('electron');
 const path = require('path');
 const os = require('os');
 
+const logArea = document.getElementById('log-area');
+
 // open file manager at specific location so we can easily open user_defines.txt config file
 const fileManagerBtn = document.getElementById('open-config-folder');
 const elrsSrcFolder = path.join(__dirname, '..','ExpressLRS', 'src', 'src');
@@ -32,20 +34,38 @@ elrsUploadTargetBtn.addEventListener('click', (event) => {
 
 // catches build started
 ipcRenderer.on('elrs-build-started', (e, target) => {
+  // disable build target select
+  elrsBuildTargetsSelect.disabled = true;
+
+  // style build target select as not allowed
+  elrsBuildTargetsSelect.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded focus:outline-none opacity-50 cursor-not-allowed'
+
   // disable build button
   elrsBuildTargetBtn.disabled = true;
+
+  // style build button as not allowed
+  elrsBuildTargetBtn.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded inline-flex items-center opacity-50 cursor-not-allowed';
   
   // change build button label
-  elrsBuildTargetBtn.value = 'Building target ' + target + ' started' ;
+  elrsBuildTargetBtn.value = 'Building target ' + target + ' started';
 
   // hide upload target button
-  elrsUploadTargetBtn.className = 'invisible'
+  elrsUploadTargetBtn.className = 'invisible';
 })
 
 // catches build successfully finished
 ipcRenderer.on('elrs-build-success', (e, target) => {
+  // enable build target select
+  elrsBuildTargetsSelect.disabled = false;
+
+  // style build target select as normal
+  elrsBuildTargetsSelect.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none'
+
   // enable build button
   elrsBuildTargetBtn.disabled = false;
+
+  // style build button as normal
+  elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
 
   // change build button label
   elrsBuildTargetBtn.value = 'Successfully built target ' + target;
@@ -57,15 +77,30 @@ ipcRenderer.on('elrs-build-success', (e, target) => {
   elrsUploadTargetBtn.value = 'Upload target ' + target
 
   // show upload target button
-  elrsUploadTargetBtn.className = 'visible'
+  elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
 
   // TODO: show download link of built firmware
 })
 
 // catches upload started
 ipcRenderer.on('elrs-upload-started', (e, target) => {
+  // disable build target select
+  elrsBuildTargetsSelect.disabled = true;
+
+  // style build target select as not allowed
+  elrsBuildTargetsSelect.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded focus:outline-none opacity-50 cursor-not-allowed'
+
   // disable build button
+  elrsBuildTargetBtn.disabled = true;
+
+  // style build button as not allowed
+  elrsBuildTargetBtn.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded inline-flex items-center opacity-50 cursor-not-allowed';
+
+  // disable upload button
   elrsUploadTargetBtn.disabled = true;
+
+  // style upload button as not allowed
+  elrsUploadTargetBtn.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded inline-flex items-center opacity-50 cursor-not-allowed';
   
   // change upload button label
   elrsUploadTargetBtn.value = 'Uploading target ' + target + ' started';
@@ -73,8 +108,23 @@ ipcRenderer.on('elrs-upload-started', (e, target) => {
 
 // catches build successfully finished
 ipcRenderer.on('elrs-upload-success', (e, target) => {
+  // enable build target select
+  elrsBuildTargetsSelect.disabled = false;
+
+  // style build target select as normal
+  elrsBuildTargetsSelect.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none'
+
+  // enable build button
+  elrsBuildTargetBtn.disabled = false;
+
+  // style build button as normal
+  elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
+
   // enable build button
   elrsUploadTargetBtn.disabled = false;
+
+  // show upload target button as normal
+  elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
 
   // change upload button label
   elrsUploadTargetBtn.value = 'Successfully uploaded target ' + target;
@@ -86,6 +136,15 @@ ipcRenderer.on('clone-elrs-repo', () => ipcRenderer.invoke('clone-elrs-repo'));
 
 ipcRenderer.on('pull-elrs-repo', () => ipcRenderer.invoke('pull-elrs-repo'));
 
+ipcRenderer.on('toggle-elrs-console', () => {
+  if (logArea.classList.contains('hidden')) {
+    // show log area
+    logArea.className = 'visible';
+  } else {
+    logArea.className = 'hidden';
+  }
+});
+
 ipcRenderer.on('open-about', () => {
     // TODO: open about info dialog
-})
+});

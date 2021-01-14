@@ -6,19 +6,22 @@
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <header>
-    <!-- TODO: fix console styling -->
+    <!-- console -->
     <div class="text-white text-sm z-10 bg-black opacity-60 absolute top-0 left-0">
-      <div>
-        <textarea id="log-area" class="resize rounded-sm z-10 bg-black opacity-75">TODO: log text here</textarea>
+      <!-- log area -->
+      <div id="log-area" class="hidden">
+        <textarea class="rounded-sm z-10 bg-black opacity-75 focus:outline-none" style="width: 874px; height: 295px;">TODO: log text here</textarea>
       </div>
 
+      <!-- TODO: enable command execution from console -->
       <div class="hidden">
         <label>elrs-cli>&nbsp;</label>
-        <input class="justify-left bg-black opacity-60" value="Enter ExpressLRS CLI command here">
+        <input class="justify-left bg-black opacity-60 focus:outline-none" value="Enter ExpressLRS CLI command here">
         <input type="button" class="justify-right bg-black opacity-60 border rounded-sm" value="Execute">
       </div>
     </div>
 
+    <!-- versions -->
     <div class="text-white text-xs absolute top-0 right-0">
       <div id="elrs-cfg-ver">
         Configurator version: 0.1.0a
@@ -30,10 +33,10 @@
     </div>
 
     <div class="z-0">
-      <img src="../assets/banner.png" width="874" height="300">
+      <img src="../assets/banner.png" width="874" height="295">
     </div>
   </header>
-  <body>
+  <body class="bg-gray-100">
     <!-- <label for="binding-phrase">My binding phrase:</label>
     <input type="text" id="binding-phrase" name="binding-phrase" value="default ExpressLRS binding phrase">
 
@@ -92,53 +95,83 @@
     <label for="Use 500 Hz">Use 500 Hz</label>
     <input type="text" id="melody" name="my melody" value="B5 16 P16 B5 16 P16 B5 16 P16 B5 2 G5 2 A5 2 B5 8 P4 A5 8 B5 1|140|-3"> -->
 
-    <div>
-      <label>Click button and modify 'user_defines.txt' in your favourite text editor:</label>
-      <input type="button" id="open-config-folder" value="Open user_defines.txt folder">
-    </div>
-
-    <div>
-      <label for="elrs-build-targets">Select PlatformIO build target:</label>
-      <select name="targets" id="elrs-build-targets">
-        <option value="Frsky_TX_R9M_via_STLINK">[env:Frsky_TX_R9M_via_STLINK]</option>
-        <option value="Frsky_TX_R9M_via_stock_BL">[env:Frsky_TX_R9M_via_stock_BL]</option>
-        <option value="Frsky_TX_R9M_LITE_via_STLINK">[env:Frsky_TX_R9M_LITE_via_STLINK]</option>
-        <option value="Frsky_TX_R9M_LITE_via_stock_BL">[env:Frsky_TX_R9M_LITE_via_stock_BL]</option>
-        <option value="Frsky_TX_R9M_LITE_PRO_via_STLINK">[env:Frsky_TX_R9M_LITE_PRO_via_STLINK]</option>
-        <option value="Frsky_RX_R9MM_R9MINI_via_STLINK">[env:Frsky_RX_R9MM_R9MINI_via_STLINK]</option>
-        <option value="Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough">[env:Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough]</option>
-        <option value="Frsky_RX_R9SLIMPLUS_via_STLINK">[env:Frsky_RX_R9SLIMPLUS_via_STLINK]</option>
-        <option value="Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough">[env:Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough]</option>
-        <option value="Frsky_RX_R9SLIMPLUS_OTA_via_STLINK">[env:Frsky_RX_R9SLIMPLUS_OTA_via_STLINK]</option>
-        <option value="Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough">[env:Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough]</option>
-        <option value="Frsky_RX_R9MX_via_STLINK">[env:Frsky_RX_R9MX_via_STLINK]</option>
-        <option value="Frsky_RX_R9MX_via_BetaflightPassthrough">[env:Frsky_RX_R9MX_via_BetaflightPassthrough]</option>
-        <option value="Jumper_RX_R900MINI_via_STLINK">[env:Jumper_RX_R900MINI_via_STLINK]</option>
-        <option value="Jumper_RX_R900MINI_via_BetaflightPassthrough">[env:Jumper_RX_R900MINI_via_BetaflightPassthrough]</option>
-        <option value="DIY_900_TX_TTGO_V1_SX127x_via_UART">[env:DIY_900_TX_TTGO_V1_SX127x_via_UART]</option>
-        <option value="DIY_900_TX_TTGO_V2_SX127x_via_UART">[env:DIY_900_TX_TTGO_V2_SX127x_via_UART]</option>
-        <option value="DIY_900_TX_ESP32_SX127x_E19_via_UART">[env:DIY_900_TX_ESP32_SX127x_E19_via_UART]</option>
-        <option value="DIY_900_TX_ESP32_SX127x_RFM95_via_UART">[env:DIY_900_TX_ESP32_SX127x_RFM95_via_UART]</option>
-        <option value="DIY_900_RX_ESP8285_SX127x_via_UART">[env:DIY_900_RX_ESP8285_SX127x_via_UART]</option>
-        <option value="DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough">[env:DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough]</option>
-        <option value="DIY_2400_TX_ESP32_SX1280_Mini_via_UART">[env:DIY_2400_TX_ESP32_SX1280_Mini_via_UART]</option>
-        <option value="DIY_2400_TX_ESP32_SX1280_E28_via_UART">[env:DIY_2400_TX_ESP32_SX1280_E28_via_UART]</option>
-        <option value="DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART">[env:DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART]</option>
-        <option value="GHOST_ATTO_2400_RX_via_STLINK">[env:GHOST_ATTO_2400_RX_via_STLINK]</option>
-        <option value="GHOST_ATTO_2400_RX_via_BetaflightPassthrough">[env:GHOST_ATTO_2400_RX_via_BetaflightPassthrough]</option>
-        <option value="DIY_2400_RX_ESP8285_SX1280_via_UART">[env:DIY_2400_RX_ESP8285_SX1280_via_UART]</option>
-        <option value="DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough">[env:DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough]</option>
-        <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5">[env:DIY_2400_RX_STM32_CCG_Nano_v0_5]</option>
-        <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough">[env:DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough]</option>
-      </select>
-    </div>
-  
-    <div>
-      <input type="button" id="elrs-build-target-btn" value="Build target">
-    </div>
-
-    <div>
-      <input type="button" id="elrs-upload-target-btn" value="Upload target" class="invisible">
+    <div class="relative w-1/2 m-4">
+      <div class="border-r-2 border-blue-400 absolute h-full top-0" style="left: 15px"></div>
+      <ul class="list-none m-0 p-0">
+        <li class="mb-2">
+          <div class="flex items-center mb-1">
+            <div class="bg-blue-400 rounded-full h-8 w-8"></div>
+            <div class="flex-1 ml-4 font-medium text-blue-400">Configure 'user_defines.txt'</div>
+          </div>
+          <div class="ml-12">
+            <input type="button" id="open-config-folder" value="Open user_defines.txt folder" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center">
+          </div>
+        </li>
+        <li class="mb-2">
+          <div class="flex items-center mb-1">
+            <div class="bg-blue-400 rounded-full h-8 w-8"></div>
+            <div class="flex-1 ml-4 font-medium text-blue-400">Choose firmware build target</div>
+          </div>
+          <div class="ml-12">
+            <select name="targets" id="elrs-build-targets" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none">
+              <option value="Frsky_TX_R9M_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_via_STLINK</option>
+              <option value="Frsky_TX_R9M_via_stock_BL" class="bg-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_via_stock_BL</option>
+              <option value="Frsky_TX_R9M_LITE_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_via_STLINK</option>
+              <option value="Frsky_TX_R9M_LITE_via_stock_BL" class="bg-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_via_stock_BL</option>
+              <option value="Frsky_TX_R9M_LITE_PRO_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_PRO_via_STLINK</option>
+              <option value="Frsky_RX_R9MM_R9MINI_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9MM_R9MINI_via_STLINK</option>
+              <option value="Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough</option>
+              <option value="Frsky_RX_R9SLIMPLUS_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_via_STLINK</option>
+              <option value="Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough</option>
+              <option value="Frsky_RX_R9SLIMPLUS_OTA_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_OTA_via_STLINK</option>
+              <option value="Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough</option>
+              <option value="Frsky_RX_R9MX_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9MX_via_STLINK</option>
+              <option value="Frsky_RX_R9MX_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">Frsky_RX_R9MX_via_BetaflightPassthrough</option>
+              <option value="Jumper_RX_R900MINI_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">Jumper_RX_R900MINI_via_STLINK</option>
+              <option value="Jumper_RX_R900MINI_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">Jumper_RX_R900MINI_via_BetaflightPassthrough</option>
+              <option value="DIY_900_TX_TTGO_V1_SX127x_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_900_TX_TTGO_V1_SX127x_via_UART</option>
+              <option value="DIY_900_TX_TTGO_V2_SX127x_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_900_TX_TTGO_V2_SX127x_via_UART</option>
+              <option value="DIY_900_TX_ESP32_SX127x_E19_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_900_TX_ESP32_SX127x_E19_via_UART</option>
+              <option value="DIY_900_TX_ESP32_SX127x_RFM95_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_900_TX_ESP32_SX127x_RFM95_via_UART</option>
+              <option value="DIY_900_RX_ESP8285_SX127x_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_900_RX_ESP8285_SX127x_via_UART</option>
+              <option value="DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough</option>
+              <option value="DIY_2400_TX_ESP32_SX1280_Mini_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_Mini_via_UART</option>
+              <option value="DIY_2400_TX_ESP32_SX1280_E28_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_E28_via_UART</option>
+              <option value="DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART</option>
+              <option value="GHOST_ATTO_2400_RX_via_STLINK" class="bg-blue-400 py-1 px-1 rounded">GHOST_ATTO_2400_RX_via_STLINK</option>
+              <option value="GHOST_ATTO_2400_RX_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">GHOST_ATTO_2400_RX_via_BetaflightPassthrough</option>
+              <option value="DIY_2400_RX_ESP8285_SX1280_via_UART" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_RX_ESP8285_SX1280_via_UART</option>
+              <option value="DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough</option>
+              <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_RX_STM32_CCG_Nano_v0_5</option>
+              <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough" class="bg-blue-400 py-1 px-1 rounded">DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough</option>
+            </select>
+          </div>
+        </li>
+        <li class="mb-2">
+          <div class="flex items-center mb-1">
+            <div class="bg-blue-400 rounded-full h-8 w-8"></div>
+            <div class="flex-1 ml-4 font-medium text-blue-400">Build selected firmware target</div>
+          </div>
+          <div class="ml-12">
+            <input type="button" id="elrs-build-target-btn" value="Build target" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded">
+          </div>
+        </li>
+        <li class="mb-2">
+          <div class="flex items-center mb-1">
+            <div class="bg-blue-400 rounded-full h-8 w-8"></div>
+            <div class="flex-1 ml-4 font-medium text-blue-400">Upload selected firmware target</div>
+          </div>
+          <div class="ml-12">
+            <input type="button" id="elrs-upload-target-btn" value="Upload target" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center invisible">
+          </div>
+        </li>
+        <li class="mb-2">
+          <div class="flex items-center mb-1">
+            <div class="bg-blue-400 rounded-full h-8 w-8"></div>
+            <div class="flex-1 ml-4 font-medium text-blue-400">Finish</div>
+          </div>
+        </li>
+      </ul>
     </div>
 
     <script src="./renderer.js"></script>
