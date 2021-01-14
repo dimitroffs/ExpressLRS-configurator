@@ -6,7 +6,32 @@
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <header>
-    <img src="../assets/banner.png" width="874" height="300">
+    <!-- TODO: fix console styling -->
+    <div class="text-white text-sm z-10 bg-black opacity-60 absolute top-0 left-0">
+      <div>
+        <textarea id="log-area" class="resize rounded-sm z-10 bg-black opacity-75">TODO: log text here</textarea>
+      </div>
+
+      <div class="hidden">
+        <label>elrs-cli>&nbsp;</label>
+        <input class="justify-left bg-black opacity-60" value="Enter ExpressLRS CLI command here">
+        <input type="button" class="justify-right bg-black opacity-60 border rounded-sm" value="Execute">
+      </div>
+    </div>
+
+    <div class="text-white text-xs absolute top-0 right-0">
+      <div id="elrs-cfg-ver">
+        Configurator version: 0.1.0a
+      </div>
+      
+      <div id="elrs-ver">
+        ExpressLRS version: 0.1.0RC1
+      </div>
+    </div>
+
+    <div class="z-0">
+      <img src="../assets/banner.png" width="874" height="300">
+    </div>
   </header>
   <body>
     <!-- <label for="binding-phrase">My binding phrase:</label>
