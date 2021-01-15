@@ -27,13 +27,22 @@ elrsBuildTargetsSelect.addEventListener('change', (event) => {
 let elrsLatestBuiltTarget; 
 
 // send event for uploading selected ExpressLRS target
-const elrsUploadTargetBtn = document.getElementById('elrs-upload-target-btn')
+const elrsUploadTargetBtn = document.getElementById('elrs-upload-target-btn');
 elrsUploadTargetBtn.addEventListener('click', (event) => {
-  ipcRenderer.invoke('upload-elrs-selected-target', elrsLatestBuiltTarget)
+  ipcRenderer.invoke('upload-elrs-selected-target', elrsLatestBuiltTarget);
 });
+
+const buildSvgDiv = document.getElementById('build-svg');
+const finishSvgDiv = document.getElementById('finish-svg');
 
 // catches build started
 ipcRenderer.on('elrs-build-started', (e, target) => {
+  // animate build svg icon
+  buildSvgDiv.className = 'animate-spin';
+
+  // stop animating finish icon
+  finishSvgDiv.className = '';
+
   // disable build target select
   elrsBuildTargetsSelect.disabled = true;
 
@@ -50,11 +59,14 @@ ipcRenderer.on('elrs-build-started', (e, target) => {
   elrsBuildTargetBtn.value = 'Building target ' + target + ' started';
 
   // hide upload target button
-  elrsUploadTargetBtn.className = 'invisible';
+  elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center invisible';
 })
 
 // catches build successfully finished
 ipcRenderer.on('elrs-build-success', (e, target) => {
+  // stop animating build svg icon
+  buildSvgDiv.className = ''
+
   // enable build target select
   elrsBuildTargetsSelect.disabled = false;
 
@@ -82,8 +94,16 @@ ipcRenderer.on('elrs-build-success', (e, target) => {
   // TODO: show download link of built firmware
 })
 
+const uploadSvgDiv = document.getElementById('upload-svg');
+
 // catches upload started
 ipcRenderer.on('elrs-upload-started', (e, target) => {
+  // animate upload svg icon
+  uploadSvgDiv.className = 'animate-bounce mt-1'
+  
+  // stop animating finish icon
+  finishSvgDiv.className = ''
+
   // disable build target select
   elrsBuildTargetsSelect.disabled = true;
 
@@ -108,6 +128,12 @@ ipcRenderer.on('elrs-upload-started', (e, target) => {
 
 // catches build successfully finished
 ipcRenderer.on('elrs-upload-success', (e, target) => {
+  // stop animating upload svg icon
+  uploadSvgDiv.className = ''
+  
+  // start animating finish icon
+  finishSvgDiv.className = 'animate-pulse'
+
   // enable build target select
   elrsBuildTargetsSelect.disabled = false;
 
