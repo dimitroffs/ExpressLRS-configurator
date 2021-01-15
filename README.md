@@ -3,6 +3,8 @@
 A simple way to build and flash https://github.com/AlessandroAU/ExpressLRS firmware. Project is on-going - use 'develop' branch for most recent stuff.
 
 ### How to try it out:
+ - some basic development skills needed, due to development stage of the app
+ - you need to install NodeJS (https://nodejs.org/en/) and Python (https://www.python.org/)
  - clone project locally
  - run 'npm install' from main project directory
  - 'elrs-cli/' directory is basic python project with virtualenv interpreter. Setup locally using PyCharm or cli so directory contains all needed libs and executable scripts:
