@@ -1,4 +1,4 @@
-const { app, globalShortcut, BrowserWindow, Menu, ipcMain } = require('electron')
+const { app, globalShortcut, BrowserWindow, Menu, ipcMain, shell } = require('electron')
 const path = require('path')
 const fs = require("fs");
 const menu = require('./menu')
@@ -14,7 +14,7 @@ const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 890,
-        height: 730,
+        height: 768,
         webPreferences: {
             nodeIntegration: true
         }
@@ -25,6 +25,11 @@ const createWindow = () => {
 
     // quit application on main window close
     mainWindow.on('closed', () => app.quit());
+
+    mainWindow.webContents.on('new-window', function(e, url) {
+        e.preventDefault();
+        shell.openExternal(url);
+    });
 
     // apply default menu
     const mainMenu = Menu.buildFromTemplate(menu);
