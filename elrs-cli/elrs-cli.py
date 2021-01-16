@@ -21,6 +21,7 @@
 #  languages and tools for configuration, build and upload of ExpressLRS firmware.
 
 import argparse
+import logging
 import os
 import subprocess
 import sys
@@ -32,6 +33,13 @@ from yaspin import yaspin
 scriptpath = os.path.realpath(__file__)
 elrsrepopath = scriptpath[0:-len("/elrs-cli/elrs-cli.py")]
 srcdir = os.path.join(elrsrepopath, "ExpressLRS", "src")
+
+# Logger config
+loggerfilename = os.path.join(elrsrepopath, "elrs-cli.log")
+logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
+                    format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
+logger = logging.getLogger('elrs-cli')
+logger.debug("test")
 
 # Initialize argument parser for ExpressLRS CLI
 parser = argparse.ArgumentParser()
@@ -55,17 +63,17 @@ def cloneElrsGithubRepo():
 # Github pull latest ExpressLRS repository master branch function
 @yaspin(text="[ExpressLRS pull] ", color="cyan")
 def pullElrsGithubRepo():
-    print("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
-    print(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
-    print("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.info("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
+    logger.info("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
     pipInstallOrUpdate('platformio')
 
 
 # Python pip install or update package function
 def pipInstallOrUpdate(package):
-    print("Executing 'pip install -U {}'".format(package))
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', package])
-    print("Successfully executed 'pip install -U {}'".format(package))
+    logger.info("Executing 'pip install -U {}'".format(package))
+    logger.info(subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', package]))
+    logger.info("Successfully executed 'pip install -U {}'".format(package))
 
 
 # ExpressLRS PlatformIO build target function
@@ -76,7 +84,8 @@ def pioBuild(target):
     else:
         print("ExpressLRS CLI build target: {}".format(target))
         pullElrsGithubRepo()
-        print("Executing PlatformIO CLI 'build' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir, target))
+        print("Executing PlatformIO CLI 'build' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir,
+                                                                                                                target))
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--environment', target])
         print("Successfully executed PlatformIO CLI 'build' for ExpressLRS target [{}] firmware".format(target))
 
@@ -88,7 +97,8 @@ def pioUpload(target):
         exit(1)
     else:
         pullElrsGithubRepo()
-        print("Executing PlatformIO CLI 'upload' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir, target))
+        print("Executing PlatformIO CLI 'upload' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir,
+                                                                                                                 target))
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--target', 'upload', '--environment', target])
         print("Successfully executed PlatformIO CLI 'upload' for ExpressLRS target [{}] firmware".format(target))
 

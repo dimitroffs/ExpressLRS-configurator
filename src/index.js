@@ -10,11 +10,32 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 let mainWindow
 
+
+
+const loggg = () => {
+    const readline = require('readline');
+
+    const fs = require('fs');
+
+    const readInterface = readline.createInterface({
+        input: fs.createReadStream('elrs-cli.log'),
+        output: process.stdout,
+        console: false
+    });
+
+    readInterface.on('line', function(line) {
+        console.log(line)
+        mainWindow.webContents.send('log-line', line)
+    });
+}
+
+
+
 const createWindow = () => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 890,
-        height: 768,
+        height: 760,
         webPreferences: {
             nodeIntegration: true
         }
@@ -53,6 +74,8 @@ app.on('ready', () => {
     })
 
     createWindow();
+
+    // loggg();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

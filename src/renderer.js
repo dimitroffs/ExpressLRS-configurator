@@ -1,11 +1,13 @@
 const { shell, ipcRenderer } = require('electron');
 const path = require('path');
 const os = require('os');
+const Tail = require('tail').Tail
 
 // html dom constants
 const elrsRepoStatusSpinner = document.getElementById('elrs-repo-status-spinner');
 const elrsRepoStatusSpan = document.getElementById('elrs-repo-status');
 const logArea = document.getElementById('log-area');
+const logAreaText = document.getElementById('log-area-text');
 const fileManagerBtn = document.getElementById('open-config-folder');
 const elrsBuildTargetBtn = document.getElementById('elrs-build-target-btn')
 const elrsBuildTargetsSelect = document.getElementById('elrs-build-targets');
@@ -13,6 +15,29 @@ const elrsUploadTargetBtn = document.getElementById('elrs-upload-target-btn');
 const buildSvgDiv = document.getElementById('build-svg');
 const finishSvgDiv = document.getElementById('finish-svg');
 const uploadSvgDiv = document.getElementById('upload-svg');
+
+// tail log file
+tail = new Tail("elrs-cli.log", { fromBeginning: true, follow: true });
+
+tail.on("line", function(data) {
+    console.log('LOG: ', data);
+    logAreaText.value += data + '\n';
+    autoScrollLogAreaText();
+});
+
+tail.on("error", function(error) {
+    console.log('ERROR: ', error);
+    logAreaText.value += data + '\n';
+    autoScrollLogAreaText();
+});
+
+// helper function to auto scroll log area
+function autoScrollLogAreaText() {
+    logAreaText.scrollTop = logAreaText.scrollHeight;
+}
+
+// watch tail log
+tail.watch();
 
 // js constants
 const elrsSrcFolder = path.join(__dirname, '..', 'ExpressLRS', 'src', 'src');
@@ -174,14 +199,12 @@ ipcRenderer.on('elrs-pull-success', () => successElrsPullUpdate());
 
 ipcRenderer.on('elrs-pull-failed', () => errorElrsPullStatus());
 
-
-
-
 ipcRenderer.on('toggle-elrs-console', () => {
     if (logArea.classList.contains('hidden')) {
         // show log area
         logArea.className = 'visible';
     } else {
+        // hide log area
         logArea.className = 'hidden';
     }
 });
