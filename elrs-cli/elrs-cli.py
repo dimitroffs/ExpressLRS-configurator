@@ -39,7 +39,6 @@ loggerfilename = os.path.join(elrsrepopath, "elrs-cli.log")
 logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
                     format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
 logger = logging.getLogger('elrs-cli')
-logger.debug("test")
 
 # Initialize argument parser for ExpressLRS CLI
 parser = argparse.ArgumentParser()
@@ -50,7 +49,6 @@ parser.add_argument("-t", "--target", type=str, help="specify ExpressLRS build/u
 parser.add_argument("-b", "--build", action="store_true", help="build ExpressLRS firmware for specified target")
 parser.add_argument("-u", "--upload", action="store_true", help="upload ExpressLRS firmware for specified target")
 args = parser.parse_args()
-
 
 # Github clone whole ExpressLRS repository function
 @yaspin(text="[ExpressLRS clone] ", color="cyan")

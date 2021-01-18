@@ -90,7 +90,10 @@ out/
 
 # elrs-cli
 elrs-cli/.idea
-elrs-cli/venv
+elrs-cli/venv/
 
 # ExpressLRS repo
 ExpressLRS/
+ 
+# VSC ignore config
+.vscode/
