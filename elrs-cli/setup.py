@@ -42,28 +42,51 @@ logger = logging.getLogger('setup')
 # Initialize argument parser for ExpressLRS CLI setup
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--setup", action="store_true", help="setup ExpressLRS Python 3 venv locally")
+parser.add_argument("-a", "--activate", action="store_true", help="activate ExpressLRS Python 3 venv locally")
 args = parser.parse_args()
+
+# Python pip install or update package function
+def pipInstallOrUpdate(package):
+    logger.info("Executing 'pip install -U {}'".format(package))
+    subprocess.check_call(['pip', 'install', '-U', package])
+    logger.info("Successfully executed 'pip install -U {}'".format(package))
+
+def activateVenv():
+    # TODO: check os and apply correct path
+    logger.info("Activating Python 3 venv for ExpressLRS CLI")
+    subprocess.check_call(['.\elrs-cli\\venv\Scripts\\activate.bat'], shell=True)
 
 def setupVenv():
     logger.info("Starting setup Python 3 venv for ExpressLRS CLI")
 
     cwd = os.getcwd()
     os.chdir(cwd)
+    venv = os.path.join(cwd, VENV_DIR)
 
     logger.info("Creating Python 3 venv for ExpressLRS CLI")
     subprocess.check_call([sys.executable, '-m', 'venv', VENV_DIR], shell=True)
-    # subprocess.run('python -m venv {}'.format(VENV_DIR), shell=True)
 
-    venv = os.path.join(cwd, VENV_DIR)
-    # go inside the virtual env folder
-    #os.chdir(venv)
+    # activate venv
+    activateVenv()
 
-    logger.info("Activating Python 3 venv for ExpressLRS CLI")
-    subprocess.check_call(['.\elrs-cli\\venv\Scripts\\activate.bat'], shell=True)
-    # subprocess.run(r'.\Scripts\activate.bat', shell=True)
+    logger.info("Updating pip package manager")
+    subprocess.check_call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], shell=True)
+
+    # install GitPython
+    pipInstallOrUpdate('gitpython')
+
+    # install yaspin
+    pipInstallOrUpdate('yaspin')
+
+    # install PlatformIO
+    pipInstallOrUpdate('platformio')
 
     logger.info("Finished setup Python 3 venv for ExpressLRS CLI")
 
 if args.setup:
     setupVenv()
+    exit(0)
+
+if args.activate:
+    activateVenv()
     exit(0)

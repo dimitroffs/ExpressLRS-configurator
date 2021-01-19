@@ -64,14 +64,6 @@ def pullElrsGithubRepo():
     logger.info("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
     logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
     logger.info("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
-    pipInstallOrUpdate('platformio')
-
-
-# Python pip install or update package function
-def pipInstallOrUpdate(package):
-    logger.info("Executing 'pip install -U {}'".format(package))
-    logger.info(subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', package]))
-    logger.info("Successfully executed 'pip install -U {}'".format(package))
 
 
 # ExpressLRS PlatformIO build target function
