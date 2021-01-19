@@ -2,6 +2,16 @@ const { app, globalShortcut, BrowserWindow, Menu, ipcMain, shell } = require('el
 const path = require('path')
 const fs = require("fs");
 const menu = require('./menu')
+const { spawn } = require('child_process')
+const log = require('electron-log');
+log.transports.file.level = 'debug';
+log.transports.file.fileName = 'elrs-cli.log';
+log.transports.file.resolvePath = (variables) => {
+    return path.join(variables.fileName);
+}
+
+const localElrsPythonVenvDir = "./elrs-cli/venv/"
+const localElrsDir = "./ExpressLRS/"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -9,27 +19,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 let mainWindow
-
-
-
-const loggg = () => {
-    const readline = require('readline');
-
-    const fs = require('fs');
-
-    const readInterface = readline.createInterface({
-        input: fs.createReadStream('elrs-cli.log'),
-        output: process.stdout,
-        console: false
-    });
-
-    readInterface.on('line', function(line) {
-        console.log(line)
-        mainWindow.webContents.send('log-line', line)
-    });
-}
-
-
 
 const createWindow = () => {
     // Create the browser window.
@@ -55,14 +44,6 @@ const createWindow = () => {
     // apply default menu
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
-
-    if (needElrsGithubRepoClone()) {
-        // clone ExpressLRS at startup if starting for first time - THIS TAKES A WHILE... BE PATIENT!
-        cloneElrsGithubRepo();
-    } else {
-        // just update local ExpressLRS repository with latest changes from master
-        pullElrsGithubRepo();
-    }
 };
 
 // This method will be called when Electron has finished
@@ -75,7 +56,12 @@ app.on('ready', () => {
 
     createWindow();
 
-    // loggg();
+    if (needElrsSetup()) {
+        // setup ExpressLRS Python 3 venv locally
+        setupElrsLocally();
+    } else {
+        activateElrsPythonVenv();
+    }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -105,7 +91,7 @@ ipcMain.handle('clone-elrs-repo', () => cloneElrsGithubRepo());
 ipcMain.handle('pull-elrs-repo', () => pullElrsGithubRepo());
 
 ipcMain.handle('build-elrs-selected-target', (e, target) => {
-    console.log('Selected [%s] target for building ExpressLRS firmware. Starting build process.', target)
+    log.info('Selected [%s] target for building ExpressLRS firmware. Starting build process.', target)
 
     // build ExpressLRS target
     buildElrsFirmwareForTarget(target)
@@ -115,7 +101,7 @@ ipcMain.handle('build-elrs-selected-target', (e, target) => {
 })
 
 ipcMain.handle('upload-elrs-selected-target', (e, target) => {
-    console.log('Selected [%s] target for uploading ExpressLRS firmware. Starting upload process.', target)
+    log.info('Selected [%s] target for uploading ExpressLRS firmware. Starting upload process.', target)
 
     // upload ExpressLRS target
     uploadElrsFirmwareForTarget(target)
@@ -124,7 +110,13 @@ ipcMain.handle('upload-elrs-selected-target', (e, target) => {
     mainWindow.webContents.send('elrs-upload-started', target)
 })
 
-const localElrsDir = "./ExpressLRS/"
+function needElrsSetup() {
+    if (!fs.existsSync(localElrsPythonVenvDir)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 function needElrsGithubRepoClone() {
     if (!fs.existsSync(localElrsDir)) {
@@ -134,29 +126,107 @@ function needElrsGithubRepoClone() {
     }
 }
 
+let setupElrsProcess = null
+const setupElrsLocally = () => {
+    // start event with running spinner loader
+    mainWindow.webContents.send('elrs-setup-started');
+
+    setupElrsProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-s']);
+
+    if (setupElrsProcess != null) {
+        log.info('Setting up ExpressLRS locally');
+
+        setupElrsProcess.stdout.on('data', function(data) {
+            log.info(data.toString());
+        });
+
+        setupElrsProcess.on('exit', (code) => {
+            if (Number(0) === Number(code)) {
+                log.info('Successfully finished setup ExpressLRS locally. Exit code: %s', code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-setup-success')
+
+                // check and update local ExpressLRS repository if needed
+                if (needElrsGithubRepoClone()) {
+                    // clone ExpressLRS at startup if starting for first time - THIS TAKES A WHILE... BE PATIENT!
+                    cloneElrsGithubRepo();
+                } else {
+                    // just update local ExpressLRS repository with latest changes from master
+                    pullElrsGithubRepo();
+                }
+            } else {
+                log.error('Failed setup ExpressLRS locally. Exit code: %s', code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-setup-failed')
+            }
+        });
+    }
+}
+
+let activatePythonVenvProcess = null
+const activateElrsPythonVenv = () => {
+    // start event with running spinner loader
+    mainWindow.webContents.send('elrs-activation-started');
+
+    activatePythonVenvProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-a']);
+
+    if (activatePythonVenvProcess != null) {
+        log.info('Activating ExpressLRS Python venv locally');
+
+        activatePythonVenvProcess.stdout.on('data', function(data) {
+            log.info(data.toString());
+        });
+
+        activatePythonVenvProcess.on('exit', (code) => {
+            if (Number(0) === Number(code)) {
+                log.info('Successfully activated ExpressLRS Python venv locally. Exit code: %s', code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-activation-success')
+
+                // check and update local ExpressLRS repository if needed
+                if (needElrsGithubRepoClone()) {
+                    // clone ExpressLRS at startup if starting for first time - THIS TAKES A WHILE... BE PATIENT!
+                    cloneElrsGithubRepo();
+                } else {
+                    // just update local ExpressLRS repository with latest changes from master
+                    pullElrsGithubRepo();
+                }
+            } else {
+                log.error('Failed activating ExpressLRS Python venv locally. Exit code: %s', code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-activation-failed')
+            }
+        });
+    }
+}
+
 let cloneElrsProcess = null
 const cloneElrsGithubRepo = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-clone-started');
 
     // execute child process
-    cloneElrsProcess = require('child_process').execFile('./elrs-cli/venv/Scripts/python.exe', ['./elrs-cli/elrs-cli.py', '-c']);
+    cloneElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-c']);
 
     if (cloneElrsProcess != null) {
-        console.log('Cloning ExpressLRS locally');
+        log.info('Cloning ExpressLRS locally');
 
         cloneElrsProcess.stdout.on('data', function(data) {
-            console.log(data.toString());
+            log.info(data.toString());
         });
 
         cloneElrsProcess.on('exit', (code) => {
             if (Number(0) === Number(code)) {
-                console.log('Cloning ExpressLRS locally finished successfully. Exit code: %s', code);
+                log.info('Cloning ExpressLRS locally finished successfully. Exit code: %s', code);
 
                 // update local ExpressLRS repository with latest changes from master after cloning master code locally
                 pullElrsGithubRepo();
             } else {
-                console.log('Failed cloning ExpressLRS locally. Exit code: %s', code);
+                log.error('Failed cloning ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
                 mainWindow.webContents.send('elrs-clone-failed')
@@ -170,23 +240,23 @@ const pullElrsGithubRepo = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-pull-started');
 
-    pullElrsProcess = require('child_process').execFile('./elrs-cli/venv/Scripts/python.exe', ['./elrs-cli/elrs-cli.py', '-p']);
+    pullElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-p']);
 
     if (pullElrsProcess != null) {
-        console.log('Updating ExpressLRS locally. Updating \'PlatformIO\' pip module');
+        log.info('Updating ExpressLRS locally.');
 
         pullElrsProcess.stdout.on('data', function(data) {
-            console.log(data.toString());
+            log.info(data.toString());
         });
 
         pullElrsProcess.on('exit', (code) => {
             if (Number(0) === Number(code)) {
-                console.log('Successfully updated ExpressLRS locally. \'PlatformIO\' pip module updated. Exit code: %s', code);
+                log.info('Successfully updated ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
                 mainWindow.webContents.send('elrs-pull-success')
             } else {
-                console.log('Failed updating ExpressLRS locally. \'PlatformIO\' pip module NOT updated. Exit code: %s', code);
+                log.error('Failed updating ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
                 mainWindow.webContents.send('elrs-pull-failed')
@@ -197,62 +267,76 @@ const pullElrsGithubRepo = () => {
 
 let buildElrsFirmwareProcess = null
 const buildElrsFirmwareForTarget = (target) => {
-    buildElrsFirmwareProcess = require('child_process').execFile('./elrs-cli/venv/Scripts/pio.exe', ['run', '--project-dir', './ExpressLRS/src', '--environment', target]);
+    buildElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-b', '-t', target]);
 
     if (buildElrsFirmwareProcess != null) {
-        console.log('Building ExpressLRS firmware for target: %s', target);
+        log.info('Building ExpressLRS firmware for target: %s', target);
 
         buildElrsFirmwareProcess.stdout.on('data', function(data) {
-            console.log(data.toString());
+            log.info(data.toString());
         });
 
         buildElrsFirmwareProcess.stderr.on('data', function(data) {
-            console.log(data.toString());
+            log.error(data.toString());
         });
 
         buildElrsFirmwareProcess.on('exit', (code) => {
-            console.log('Building ExpressLRS firmware for target %s completed. Exit code: %s', target, code);
+            log.info('Building ExpressLRS firmware for target %s completed. Exit code: %s', target, code);
 
             // if execute code successful - send event for successful build done
             if (Number(0) === Number(code)) {
                 // send event for successfully finished target build
                 mainWindow.webContents.send('elrs-build-success', target)
+            } else {
+                log.error('Failed building ExpressLRS firmware for target %s. Exit code: %s', target, code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-build-failed', target)
             }
-            // TODO: handle error cases
         });
     }
 }
 
 let uploadElrsFirmwareProcess = null
 const uploadElrsFirmwareForTarget = (target) => {
-    uploadElrsFirmwareProcess = require('child_process').execFile('./elrs-cli/venv/Scripts/pio.exe', ['run', '--project-dir', './ExpressLRS/src', '--target', 'upload', '--environment', target]);
+    uploadElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-u', '-t', target]);
 
     if (uploadElrsFirmwareProcess != null) {
-        console.log('Started uploading ExpressLRS firmware for target: %s', target);
+        log.info('Started uploading ExpressLRS firmware for target: %s', target);
 
         uploadElrsFirmwareProcess.stdout.on('data', function(data) {
-            console.log(data.toString());
+            log.info(data.toString());
         });
 
         uploadElrsFirmwareProcess.stderr.on('data', function(data) {
-            console.log(data.toString());
+            log.error(data.toString());
         });
 
         uploadElrsFirmwareProcess.on('exit', (code) => {
-            console.log('Uploading ExpressLRS firmware for target %s has completed. Exit code: %s', target, code);
+            log.info('Uploading ExpressLRS firmware for target %s has completed. Exit code: %s', target, code);
 
             // if execute code successful - send event for successful upload done
             if (Number(0) === Number(code)) {
                 // send event for successfully finished target upload
                 mainWindow.webContents.send('elrs-upload-success', target)
+            } else {
+                log.error('Failed uploading ExpressLRS firmware for target %s. Exit code: %s', target, code);
+
+                // send success event for stopping spinner loader
+                mainWindow.webContents.send('elrs-upload-failed', target)
             }
-            //TODO: handle error cases
         });
     }
 }
 
 const killAllProcesses = () => {
-    console.log('Killing all ExpressLRS CLI processes');
+    log.info('Killing all ExpressLRS CLI processes');
+    setupElrsProcess.kill();
+    setupElrsProcess = null;
+
+    activatePythonVenvProcess.kill();
+    activatePythonVenvProcess = null;
+
     cloneElrsProcess.kill();
     cloneElrsProcess = null;
 

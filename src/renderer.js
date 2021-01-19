@@ -67,6 +67,9 @@ elrsUploadTargetBtn.addEventListener('click', (event) => {
 
 // catches build started
 ipcRenderer.on('elrs-build-started', (e, target) => {
+    // show status text
+    startElrsStatusMsg("Building ExpressLRS firmware")
+
     // animate build svg icon
     buildSvgDiv.className = 'animate-spin';
 
@@ -94,6 +97,9 @@ ipcRenderer.on('elrs-build-started', (e, target) => {
 
 // catches build successfully finished
 ipcRenderer.on('elrs-build-success', (e, target) => {
+    // show status text
+    successElrsStatusMsg("ExpressLRS build firmware complete")
+
     // stop animating build svg icon
     buildSvgDiv.className = ''
 
@@ -124,8 +130,34 @@ ipcRenderer.on('elrs-build-success', (e, target) => {
     // TODO: show download link of built firmware
 })
 
+// catches build successfully finished
+ipcRenderer.on('elrs-build-failed', (e, target) => {
+    // stop animating build svg icon
+    buildSvgDiv.className = ''
+
+    // enable build target select
+    elrsBuildTargetsSelect.disabled = false;
+
+    // style build target select as normal
+    elrsBuildTargetsSelect.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none'
+
+    // enable build button
+    elrsBuildTargetBtn.disabled = false;
+
+    // style build button as normal
+    elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
+
+    // change build button label
+    elrsBuildTargetBtn.value = 'Failed building target ' + target;
+
+    errorElrsStatusMsg("Failed building ExpressLRS firmware");
+})
+
 // catches upload started
 ipcRenderer.on('elrs-upload-started', (e, target) => {
+    // show status text
+    startElrsStatusMsg("Uploading ExpressLRS firmware")
+
     // animate upload svg icon
     uploadSvgDiv.className = 'animate-bounce mt-1'
 
@@ -156,6 +188,9 @@ ipcRenderer.on('elrs-upload-started', (e, target) => {
 
 // catches build successfully finished
 ipcRenderer.on('elrs-upload-success', (e, target) => {
+    // show status text
+    successElrsStatusMsg("ExpressLRS upload firmware complete")
+
     // stop animating upload svg icon
     uploadSvgDiv.className = ''
 
@@ -184,20 +219,61 @@ ipcRenderer.on('elrs-upload-success', (e, target) => {
     elrsUploadTargetBtn.value = 'Successfully uploaded target ' + target;
 })
 
+// catches build successfully finished
+ipcRenderer.on('elrs-upload-failed', (e, target) => {
+    // stop animating upload svg icon
+    uploadSvgDiv.className = ''
+
+    // enable build target select
+    elrsBuildTargetsSelect.disabled = false;
+
+    // style build target select as normal
+    elrsBuildTargetsSelect.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none'
+
+    // enable build button
+    elrsBuildTargetBtn.disabled = false;
+
+    // style build button as normal
+    elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
+
+    // enable upload button
+    elrsUploadTargetBtn.disabled = false;
+
+    // show upload target button as normal
+    elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
+
+    // change upload button label
+    elrsUploadTargetBtn.value = 'Failed uploading target ' + target;
+
+    errorElrsStatusMsg("Failed uploading ExpressLRS firmware");
+})
+
 // Catches menu event and re-send the event to server
+ipcRenderer.on('elrs-setup-started', () => startElrsStatusMsg("Setting up ExpressLRS Python venv"));
+
+ipcRenderer.on('elrs-setup-success', () => successElrsStatusMsg("ExpressLRS Python venv setup complete"));
+
+ipcRenderer.on('elrs-setup-failed', () => errorElrsStatusMsg("Failed setting up ExpressLRS Python venv"));
+
+ipcRenderer.on('elrs-activation-started', () => startElrsStatusMsg("Activating ExpressLRS Python venv"));
+
+ipcRenderer.on('elrs-activation-success', () => successElrsStatusMsg("ExpressLRS Python venv activation complete"));
+
+ipcRenderer.on('elrs-activation-failed', () => errorElrsStatusMsg("Failed activating ExpressLRS Python venv"));
+
 ipcRenderer.on('clone-elrs-repo', () => ipcRenderer.invoke('clone-elrs-repo'));
 
 ipcRenderer.on('pull-elrs-repo', () => ipcRenderer.invoke('pull-elrs-repo'));
 
-ipcRenderer.on('elrs-clone-started', () => startElrsStatusUpdate());
+ipcRenderer.on('elrs-clone-started', () => startElrsStatusMsg("Cloning ExpressLRS locally"));
 
-ipcRenderer.on('elrs-clone-failed', () => errorElrsCloneStatus());
+ipcRenderer.on('elrs-clone-failed', () => errorElrsStatusMsg("Failed cloning ExpressLRS repository"));
 
-ipcRenderer.on('elrs-pull-started', () => startElrsStatusUpdate());
+ipcRenderer.on('elrs-pull-started', () => startElrsStatusMsg("Updating ExpressLRS locally"));
 
-ipcRenderer.on('elrs-pull-success', () => successElrsPullUpdate());
+ipcRenderer.on('elrs-pull-success', () => successElrsStatusMsg("Local ExpressLRS repository updated"));
 
-ipcRenderer.on('elrs-pull-failed', () => errorElrsPullStatus());
+ipcRenderer.on('elrs-pull-failed', () => errorElrsStatusMsg("Failed updating ExpressLRS local repository"));
 
 ipcRenderer.on('toggle-elrs-console', () => {
     if (logArea.classList.contains('hidden')) {
@@ -213,34 +289,26 @@ ipcRenderer.on('open-about', () => {
     // TODO: open about info dialog
 });
 
-function startElrsStatusUpdate() {
+function startElrsStatusMsg(msg) {
     // start status spinner
     elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1"
 
     // change status message
-    elrsRepoStatusSpan.innerHTML = "Updating ExpressLRS local repository";
+    elrsRepoStatusSpan.innerHTML = msg;
 }
 
-function successElrsPullUpdate() {
+function successElrsStatusMsg(msg) {
     // start status spinner
     elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1 hidden"
 
     // change status message
-    elrsRepoStatusSpan.innerHTML = "Local ExpressLRS repository updated";
+    elrsRepoStatusSpan.innerHTML = msg;
 }
 
-function errorElrsPullStatus() {
+function errorElrsStatusMsg(msg) {
     // start status spinner
     elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1 hidden"
 
     // change status message
-    elrsRepoStatusSpan.innerHTML = "Failed updating ExpressLRS local repository";
-}
-
-function errorElrsCloneStatus() {
-    // start status spinner
-    elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1 hidden"
-
-    // change status message
-    elrsRepoStatusSpan.innerHTML = "Failed cloning ExpressLRS repository";
+    elrsRepoStatusSpan.innerHTML = msg;
 }
