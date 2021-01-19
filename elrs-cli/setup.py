@@ -43,6 +43,7 @@ logger = logging.getLogger('setup')
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--setup", action="store_true", help="setup ExpressLRS Python 3 venv locally")
 parser.add_argument("-a", "--activate", action="store_true", help="activate ExpressLRS Python 3 venv locally")
+parser.add_argument("-d", "--deactivate", action="store_true", help="deactivate ExpressLRS Python 3 venv locally")
 args = parser.parse_args()
 
 # Python pip install or update package function
@@ -55,6 +56,11 @@ def activateVenv():
     # TODO: check os and apply correct path
     logger.info("Activating Python 3 venv for ExpressLRS CLI")
     subprocess.check_call(['.\elrs-cli\\venv\Scripts\\activate.bat'], shell=True)
+
+def deactivateVenv():
+    # TODO: check os and apply correct path
+    logger.info("Deactivating Python 3 venv for ExpressLRS CLI")
+    subprocess.check_call(['.\elrs-cli\\venv\Scripts\\deactivate.bat'], shell=True)
 
 def setupVenv():
     logger.info("Starting setup Python 3 venv for ExpressLRS CLI")
@@ -89,4 +95,8 @@ if args.setup:
 
 if args.activate:
     activateVenv()
+    exit(0)
+
+if args.deactivate:
+    deactivateVenv()
     exit(0)
