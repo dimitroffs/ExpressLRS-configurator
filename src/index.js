@@ -27,7 +27,8 @@ const createWindow = () => {
         height: 760,
         webPreferences: {
             nodeIntegration: true
-        }
+        },
+        show: false
     });
 
     // and load the index.html of the app.
@@ -44,6 +45,17 @@ const createWindow = () => {
     // apply default menu
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
+
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show()
+
+        if (needElrsSetup()) {
+            // setup ExpressLRS Python 3 venv locally
+            setupElrsLocally();
+        } else {
+            activateElrsPythonVenv();
+        }
+    })
 };
 
 // This method will be called when Electron has finished
@@ -55,13 +67,6 @@ app.on('ready', () => {
     })
 
     createWindow();
-
-    if (needElrsSetup()) {
-        // setup ExpressLRS Python 3 venv locally
-        setupElrsLocally();
-    } else {
-        activateElrsPythonVenv();
-    }
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
