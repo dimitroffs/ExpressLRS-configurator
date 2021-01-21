@@ -159,7 +159,7 @@ const setupElrsLocally = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-setup-started');
 
-    setupElrsProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-s']);
+    setupElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/setup.py', '-s']);
 
     if (setupElrsProcess != null) {
         log.info('Setting up ExpressLRS locally');
@@ -198,7 +198,7 @@ const activateElrsPythonVenv = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-activation-started');
 
-    activatePythonVenvProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-a']);
+    activatePythonVenvProcess = spawn('py', ['-3', './resources/app/elrs-cli/setup.py', '-a']);
 
     if (activatePythonVenvProcess != null) {
         log.info('Activating ExpressLRS Python venv locally');
@@ -238,7 +238,7 @@ const cloneElrsGithubRepo = () => {
     mainWindow.webContents.send('elrs-clone-started');
 
     // execute child process
-    cloneElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-c']);
+    cloneElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-c']);
 
     if (cloneElrsProcess != null) {
         log.info('Cloning ExpressLRS locally');
@@ -268,7 +268,7 @@ const pullElrsGithubRepo = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-pull-started');
 
-    pullElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-p']);
+    pullElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-p']);
 
     if (pullElrsProcess != null) {
         log.info('Updating ExpressLRS locally.');
@@ -295,7 +295,7 @@ const pullElrsGithubRepo = () => {
 
 let buildElrsFirmwareProcess = null
 const buildElrsFirmwareForTarget = (target) => {
-    buildElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-b', '-t', target]);
+    buildElrsFirmwareProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-b', '-t', target]);
 
     if (buildElrsFirmwareProcess != null) {
         log.info('Building ExpressLRS firmware for target: %s', target);
@@ -327,7 +327,7 @@ const buildElrsFirmwareForTarget = (target) => {
 
 let uploadElrsFirmwareProcess = null
 const uploadElrsFirmwareForTarget = (target) => {
-    uploadElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-u', '-t', target]);
+    uploadElrsFirmwareProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-u', '-t', target]);
 
     if (uploadElrsFirmwareProcess != null) {
         log.info('Started uploading ExpressLRS firmware for target: %s', target);
