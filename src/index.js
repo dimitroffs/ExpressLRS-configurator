@@ -21,7 +21,24 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 let mainWindow
 
 const createWindow = () => {
-    // Create the browser window.
+
+    aboutWindow = new BrowserWindow({ 
+        width: 300,
+        height: 300, 
+        frame: false,
+        show: false
+    });
+
+    // and load the index.html of the app.
+    aboutWindow.loadFile(path.join(__dirname, 'about.html'));
+
+    // when focus is lost on about window - hide it
+    aboutWindow.on('blur', () => {
+        aboutWindow.hide();
+        mainWindow.setOpacity(1.0);
+    });
+
+    // create the browser window.
     mainWindow = new BrowserWindow({
         width: 890,
         height: 760,
@@ -47,7 +64,7 @@ const createWindow = () => {
     Menu.setApplicationMenu(mainMenu);
 
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
+        mainWindow.show();
 
         if (needElrsSetup()) {
             // setup ExpressLRS Python 3 venv locally
@@ -94,6 +111,12 @@ ipcMain.handle('clone-elrs-repo', () => cloneElrsGithubRepo());
 
 // update ExpressLRS repository locally
 ipcMain.handle('pull-elrs-repo', () => pullElrsGithubRepo());
+
+// handle about button click
+ipcMain.handle('open-about-clicked', () => {
+    mainWindow.setOpacity(0.9);
+    aboutWindow.show();
+});
 
 ipcMain.handle('build-elrs-selected-target', (e, target) => {
     log.info('Selected [%s] target for building ExpressLRS firmware. Starting build process.', target)

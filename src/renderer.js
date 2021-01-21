@@ -58,6 +58,9 @@ elrsBuildTargetBtn.addEventListener('click', (event) => {
 // update build ExpressLRS button label with selected target
 elrsBuildTargetsSelect.addEventListener('change', (event) => {
     elrsBuildTargetBtn.value = 'Build target: ' + elrsBuildTargetsSelect.value;
+
+    // style build button as normal
+    elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
 });
 
 // send event for uploading selected ExpressLRS target
@@ -113,7 +116,7 @@ ipcRenderer.on('elrs-build-success', (e, target) => {
     elrsBuildTargetBtn.disabled = false;
 
     // style build button as normal
-    elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
+    elrsBuildTargetBtn.classList = 'bg-green-400 hover:bg-green-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
 
     // change build button label
     elrsBuildTargetBtn.value = 'Successfully built target ' + target;
@@ -145,7 +148,7 @@ ipcRenderer.on('elrs-build-failed', (e, target) => {
     elrsBuildTargetBtn.disabled = false;
 
     // style build button as normal
-    elrsBuildTargetBtn.classList = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
+    elrsBuildTargetBtn.classList = 'bg-red-400 hover:bg-red-600 text-white font-bold py-1 px-2 rounded inline-flex items-center';
 
     // change build button label
     elrsBuildTargetBtn.value = 'Failed building target ' + target;
@@ -169,6 +172,9 @@ ipcRenderer.on('elrs-upload-started', (e, target) => {
 
     // style build target select as not allowed
     elrsBuildTargetsSelect.className = 'bg-blue-400 text-white font-bold py-1 px-2 rounded focus:outline-none opacity-50 cursor-not-allowed'
+
+    // change build button label
+    elrsBuildTargetBtn.value = 'Build target: ' + target;
 
     // disable build button
     elrsBuildTargetBtn.disabled = true;
@@ -213,7 +219,7 @@ ipcRenderer.on('elrs-upload-success', (e, target) => {
     elrsUploadTargetBtn.disabled = false;
 
     // show upload target button as normal
-    elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
+    elrsUploadTargetBtn.className = 'bg-green-400 hover:bg-green-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
 
     // change upload button label
     elrsUploadTargetBtn.value = 'Successfully uploaded target ' + target;
@@ -240,7 +246,7 @@ ipcRenderer.on('elrs-upload-failed', (e, target) => {
     elrsUploadTargetBtn.disabled = false;
 
     // show upload target button as normal
-    elrsUploadTargetBtn.className = 'bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
+    elrsUploadTargetBtn.className = 'bg-red-400 hover:bg-red-600 text-white font-bold py-1 px-2 rounded inline-flex items-center visible';
 
     // change upload button label
     elrsUploadTargetBtn.value = 'Failed uploading target ' + target;
@@ -286,7 +292,7 @@ ipcRenderer.on('toggle-elrs-console', () => {
 });
 
 ipcRenderer.on('open-about', () => {
-    // TODO: open about info dialog
+    ipcRenderer.invoke('open-about-clicked')
 });
 
 function startElrsStatusMsg(msg) {
