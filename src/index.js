@@ -23,8 +23,8 @@ let mainWindow
 const createWindow = () => {
 
     aboutWindow = new BrowserWindow({ 
-        width: 300,
-        height: 300, 
+        width: 390,
+        height: 420, 
         frame: false,
         show: false
     });
@@ -36,6 +36,11 @@ const createWindow = () => {
     aboutWindow.on('blur', () => {
         aboutWindow.hide();
         mainWindow.setOpacity(1.0);
+    });
+
+    aboutWindow.webContents.on('new-window', function(e, url) {
+        e.preventDefault();
+        shell.openExternal(url);
     });
 
     // create the browser window.
