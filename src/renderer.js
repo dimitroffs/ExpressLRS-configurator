@@ -9,6 +9,7 @@ const elrsRepoStatusSpan = document.getElementById('elrs-repo-status');
 const logArea = document.getElementById('log-area');
 const logAreaText = document.getElementById('log-area-text');
 const elrsBranchesSelect = document.getElementById('elrs-remote-branches');
+const elrsBranchResetBtn = document.getElementById('elrs-branch-reset');
 const fileManagerBtn = document.getElementById('open-config-folder');
 const elrsBuildTargetBtn = document.getElementById('elrs-build-target-btn')
 const elrsBuildTargetsSelect = document.getElementById('elrs-build-targets');
@@ -67,6 +68,10 @@ elrsBuildTargetsSelect.addEventListener('change', (event) => {
 // send event for uploading selected ExpressLRS target
 elrsUploadTargetBtn.addEventListener('click', (event) => {
     ipcRenderer.invoke('upload-elrs-selected-target', elrsLatestBuiltTarget);
+});
+
+elrsBranchResetBtn.addEventListener('click', (event) => {
+    ipcRenderer.invoke('elrs-reset-branch', elrsBranchesSelect.value);
 });
 
 // catches build started
@@ -282,6 +287,16 @@ ipcRenderer.on('elrs-pull-success', () => successElrsStatusMsg("Local ExpressLRS
 
 ipcRenderer.on('elrs-pull-failed', () => errorElrsStatusMsg("Failed updating ExpressLRS local repository"));
 
+ipcRenderer.on('update-elrs-branches-started', () => startElrsStatusMsg("Fetching remote ExpressLRS branches"));
+
+ipcRenderer.on('update-elrs-branches-failed', () => errorElrsStatusMsg("Failed fetching remote ExpressLRS branches"));
+
+ipcRenderer.on('elrs-reset-branch-started', () => startElrsStatusMsg("Resetting local ExpressLRS repository to specific branch"));
+
+ipcRenderer.on('elrs-reset-branch-success', () => successElrsStatusMsg("Successfully reset local ExpressLRS repository to specific branch"));
+
+ipcRenderer.on('elrs-reset-branch-failed', () => errorElrsStatusMsg("Failed resetting local ExpressLRS repository to specific branch"));
+
 ipcRenderer.on('toggle-elrs-console', () => {
     if (logArea.classList.contains('hidden')) {
         // show log area
@@ -301,6 +316,8 @@ ipcRenderer.on('update-elrs-branches', (e, fetchedElrsRemoteBranches) => {
 });
 
 ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
+    successElrsStatusMsg("Successfully fetched remote ExpressLRS branches");
+
     updateElrsRemoteBranches(fetchedElrsRemoteBranches);
 });
 

@@ -46,6 +46,7 @@ parser.add_argument("-c", "--clone", action="store_true", help="clone ExpressLRS
 parser.add_argument("-p", "--pull", action="store_true",
                     help="pull latest changes locally from ExpressLRS GitHub repository master branch")
 parser.add_argument("-l", "--list", action="store_true", help="list ExpressLRS GitHub repository branches")
+parser.add_argument("-r", "--reset", type=str, help="reset ExpressLRS to specific branch")
 parser.add_argument("-t", "--target", type=str, help="specify ExpressLRS build/upload target for PlatformIO")
 parser.add_argument("-b", "--build", action="store_true", help="build ExpressLRS firmware for specified target")
 parser.add_argument("-u", "--upload", action="store_true", help="upload ExpressLRS firmware for specified target")
@@ -87,6 +88,13 @@ def fetchElrsGithubRepoBranches():
         return []
 
 
+# Reset current ExpressLRS local repository to specific branch
+def resetElrsLocalRepositoryToBranch(branch):
+    logger.info("Resetting ExpressLRS local repository to remote '{}' branch".format(branch))
+    logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').reset('--hard', branch))
+    logger.info("Successfully reset ExpressLRS local repository to remote '{}' branch".format(branch))
+
+
 # ExpressLRS PlatformIO build target function
 def pioBuild(target):
     if target is None:
@@ -124,6 +132,11 @@ if args.pull:
 
 if args.list:
     print(fetchElrsGithubRepoBranches())
+    exit(0)
+
+if args.reset:
+    branch = args.reset
+    resetElrsLocalRepositoryToBranch(branch)
     exit(0)
 
 # fetch build/upload target from CLI args
