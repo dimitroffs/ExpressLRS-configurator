@@ -8,6 +8,7 @@ const elrsRepoStatusSpinner = document.getElementById('elrs-repo-status-spinner'
 const elrsRepoStatusSpan = document.getElementById('elrs-repo-status');
 const logArea = document.getElementById('log-area');
 const logAreaText = document.getElementById('log-area-text');
+const elrsBranchesSelect = document.getElementById('elrs-remote-branches');
 const fileManagerBtn = document.getElementById('open-config-folder');
 const elrsBuildTargetBtn = document.getElementById('elrs-build-target-btn')
 const elrsBuildTargetsSelect = document.getElementById('elrs-build-targets');
@@ -295,6 +296,10 @@ ipcRenderer.on('open-about', () => {
     ipcRenderer.invoke('open-about-clicked')
 });
 
+ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
+    updateElrsRemoteBranches(fetchedElrsRemoteBranches);
+});
+
 function startElrsStatusMsg(msg) {
     // start status spinner
     elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1"
@@ -317,4 +322,25 @@ function errorElrsStatusMsg(msg) {
 
     // change status message
     elrsRepoStatusSpan.innerHTML = msg;
+}
+
+function updateElrsRemoteBranches(fetchedRemoteBranches) {  
+    var fragment = document.createDocumentFragment();
+
+    // trim branches string
+    fetchedRemoteBranches = fetchedRemoteBranches.trim();
+
+    // remove start/end brackets for better split
+    var substringEnd = fetchedRemoteBranches.length-2;
+    fetchedRemoteBranches = fetchedRemoteBranches.substring(2, substringEnd);
+
+    // split remote branches and apply to branches select component
+    fetchedRemoteBranches.split("\', \'").forEach(function(branchName, index) {
+        var opt = document.createElement('option');
+        opt.innerHTML = branchName;
+        opt.value = branchName;
+        fragment.appendChild(opt);
+    });
+
+    elrsBranchesSelect.appendChild(fragment);
 }

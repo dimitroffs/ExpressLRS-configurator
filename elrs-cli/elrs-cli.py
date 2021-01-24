@@ -45,6 +45,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--clone", action="store_true", help="clone ExpressLRS GitHub repository locally")
 parser.add_argument("-p", "--pull", action="store_true",
                     help="pull latest changes locally from ExpressLRS GitHub repository master branch")
+parser.add_argument("-l", "--list", action="store_true", help="list ExpressLRS GitHub repository branches")
 parser.add_argument("-t", "--target", type=str, help="specify ExpressLRS build/upload target for PlatformIO")
 parser.add_argument("-b", "--build", action="store_true", help="build ExpressLRS firmware for specified target")
 parser.add_argument("-u", "--upload", action="store_true", help="upload ExpressLRS firmware for specified target")
@@ -64,6 +65,26 @@ def pullElrsGithubRepo():
     logger.info("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
     logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
     logger.info("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
+
+
+# Helper function to get all ExpressLRS remote branches from GitHub repository
+def fetchElrsGithubRepoBranches():
+    try:
+        logger.info("Fetching latest ExpressLRS branches from GitHub repository")
+        localRepo = git.cmd.Git(elrsrepopath + '/ExpressLRS')
+        localRepo.fetch('--all')
+        allRemoteBranches = localRepo.branch('-r').split('\n')
+        allRemoteBranchesNames = [b.strip() for b in allRemoteBranches]
+        logger.info("Successfully fetched total {} ExpressLRS branches from GitHub repository".format(len(allRemoteBranchesNames)))
+
+        # HEAD is not needed in this list
+        remoteBranchesNames = [ b for b in allRemoteBranchesNames if not 'origin/HEAD' in b]
+        logger.info("Only {} ExpressLRS branches useful from origin".format(len(remoteBranchesNames)))
+
+        return remoteBranchesNames
+    except Exception as e:
+        logger.error("Unable to fetch ExpressLRS GirHub repository branches")
+        return []
 
 
 # ExpressLRS PlatformIO build target function
@@ -99,6 +120,10 @@ if args.clone:
 
 if args.pull:
     pullElrsGithubRepo()
+    exit(0)
+
+if args.list:
+    print(fetchElrsGithubRepoBranches())
     exit(0)
 
 # fetch build/upload target from CLI args

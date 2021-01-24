@@ -76,6 +76,8 @@ const createWindow = () => {
             setupElrsLocally();
         } else {
             activateElrsPythonVenv();
+
+            // listElrsBranches();
         }
     })
 };
@@ -121,6 +123,7 @@ ipcMain.handle('pull-elrs-repo', () => pullElrsGithubRepo());
 ipcMain.handle('open-about-clicked', () => {
     mainWindow.setOpacity(0.9);
     aboutWindow.show();
+    listElrsBranches();
 });
 
 ipcMain.handle('build-elrs-selected-target', (e, target) => {
@@ -298,6 +301,39 @@ const pullElrsGithubRepo = () => {
     }
 }
 
+let listElrsBranchesProcess = null;
+let fetchedRemoteBranches = null;
+const listElrsBranches = () => {
+    // start event with running spinner loader
+    // mainWindow.webContents.send('elrs-clone-started');
+
+    // execute child process
+    listElrsBranchesProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-l']);
+
+    if (listElrsBranchesProcess != null) {
+        log.info('Fetching ExpressLRS remote branches locally');
+        
+        listElrsBranchesProcess.stdout.on('data', function(data) {
+            fetchedRemoteBranches = '' + data.toString();
+            log.info("Fetched ExpressLRS remoted branches: " + data.toString());
+        });
+
+        listElrsBranchesProcess.on('exit', (code) => {
+            if (Number(0) === Number(code)) {
+                log.info('Successfully fetched ExpressLRS remote branches locally. Exit code: %s', code);
+
+                // update local ExpressLRS component, keeping remote branches for select
+                mainWindow.webContents.send('update-elrs-branches-success', fetchedRemoteBranches);
+            } else {
+                log.error('Failed fetching ExpressLRS remote branches locally. Exit code: %s', code);
+
+                // send success event for stopping spinner loader
+                // mainWindow.webContents.send('elrs-clone-failed')
+            }
+        });
+    }
+}
+
 let buildElrsFirmwareProcess = null
 const buildElrsFirmwareForTarget = (target) => {
     buildElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-b', '-t', target]);
@@ -375,6 +411,9 @@ const killAllProcesses = () => {
 
     pullElrsProcess.kill();
     pullElrsProcess = null;
+
+    listElrsBranchesProcess.kill();
+    listElrsBranchesProcess = null;
 
     buildElrsFirmwareProcess.kill();
     buildElrsFirmwareProcess = null;
