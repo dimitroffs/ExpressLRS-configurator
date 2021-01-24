@@ -296,6 +296,10 @@ ipcRenderer.on('open-about', () => {
     ipcRenderer.invoke('open-about-clicked')
 });
 
+ipcRenderer.on('update-elrs-branches', (e, fetchedElrsRemoteBranches) => {
+    ipcRenderer.invoke('update-elrs-branches-clicked')
+});
+
 ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
     updateElrsRemoteBranches(fetchedElrsRemoteBranches);
 });
@@ -339,8 +343,10 @@ function updateElrsRemoteBranches(fetchedRemoteBranches) {
         var opt = document.createElement('option');
         opt.innerHTML = branchName;
         opt.value = branchName;
+        opt.className = "bg-gray-100 text-blue-400 py-1 px-1 rounded";
         fragment.appendChild(opt);
     });
 
     elrsBranchesSelect.appendChild(fragment);
+    elrsBranchesSelect.value = "origin/master";
 }

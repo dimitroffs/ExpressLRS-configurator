@@ -112,6 +112,24 @@
                 <div class="flex items-center mb-1">
                     <div class="relative bg-blue-400 rounded-full h-8 w-8 text-white p-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M2 9.5A3.5 3.5 0 005.5 13H9v2.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 15.586V13h2.5a4.5 4.5 0 10-.616-8.958 4.002 4.002 0 10-7.753 1.977A3.5 3.5 0 002 9.5zm9 3.5H9V8a1 1 0 012 0v5z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 ml-4 font-medium text-blue-400">Choose specific ExpressLRS remote branch</div>
+                </div>
+                <div class="flex justify-start">
+                    <div class="ml-12">
+                        <select name="branches" id="elrs-remote-branches" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none"></select>
+                    </div>
+                    <div class="ml-2">
+                        <input type="button" id="elrs-branch-reset" value="Reset" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-6 rounded ml-1">
+                    </div>
+                </div>
+            </li>
+            <li class="mb-2">
+                <div class="flex items-center mb-1">
+                    <div class="relative bg-blue-400 rounded-full h-8 w-8 text-white p-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                         </svg>
                     </div>
@@ -178,8 +196,6 @@
                 </div>
                 <div class="ml-12">
                     <input type="button" id="elrs-build-target-btn" value="Build target" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded">
-
-                    <select id="elrs-remote-branches"></select>
                 </div>
             </li>
             <li class="mb-2">

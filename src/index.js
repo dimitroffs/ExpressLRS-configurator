@@ -46,7 +46,7 @@ const createWindow = () => {
     // create the browser window.
     mainWindow = new BrowserWindow({
         width: 890,
-        height: 760,
+        height: 840,
         webPreferences: {
             nodeIntegration: true
         },
@@ -77,7 +77,8 @@ const createWindow = () => {
         } else {
             activateElrsPythonVenv();
 
-            // listElrsBranches();
+            // initialize fetched remoted branches locally
+            listElrsBranches();
         }
     })
 };
@@ -123,7 +124,6 @@ ipcMain.handle('pull-elrs-repo', () => pullElrsGithubRepo());
 ipcMain.handle('open-about-clicked', () => {
     mainWindow.setOpacity(0.9);
     aboutWindow.show();
-    listElrsBranches();
 });
 
 ipcMain.handle('build-elrs-selected-target', (e, target) => {
@@ -145,6 +145,11 @@ ipcMain.handle('upload-elrs-selected-target', (e, target) => {
     // send event for successful start of upload
     mainWindow.webContents.send('elrs-upload-started', target)
 })
+
+// handle update ExpressLRS branches clicked
+ipcMain.handle('update-elrs-branches-clicked', () => {
+    listElrsBranches();
+});
 
 function needElrsSetup() {
     if (!fs.existsSync(localElrsPythonVenvDir)) {

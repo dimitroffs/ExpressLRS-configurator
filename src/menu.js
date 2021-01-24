@@ -11,6 +11,10 @@ const menu = [
             {
                 label: 'Pull ExpressLRS repository',
                 click(item, mainWindow) { mainWindow.webContents.send('pull-elrs-repo') }
+            },
+            {
+                label: 'Refresh ExpressLRS remote branches',
+                click(item, mainWindow) { mainWindow.webContents.send('update-elrs-branches') }
             }
         ]
     },
