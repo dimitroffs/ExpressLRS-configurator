@@ -19,7 +19,7 @@ const finishSvgDiv = document.getElementById('finish-svg');
 const uploadSvgDiv = document.getElementById('upload-svg');
 
 // tail log file
-tail = new Tail("elrs-cli.log", { fromBeginning: true, follow: true });
+tail = new Tail("./resources/app/elrs-cli.log", { fromBeginning: true, follow: true });
 
 tail.on("line", function(data) {
     console.log('LOG: ', data);
@@ -345,14 +345,14 @@ function errorElrsStatusMsg(msg) {
     elrsRepoStatusSpan.innerHTML = msg;
 }
 
-function updateElrsRemoteBranches(fetchedRemoteBranches) {  
+function updateElrsRemoteBranches(fetchedRemoteBranches) {
     var fragment = document.createDocumentFragment();
 
     // trim branches string
     fetchedRemoteBranches = fetchedRemoteBranches.trim();
 
     // remove start/end brackets for better split
-    var substringEnd = fetchedRemoteBranches.length-2;
+    var substringEnd = fetchedRemoteBranches.length - 2;
     fetchedRemoteBranches = fetchedRemoteBranches.substring(2, substringEnd);
 
     // split remote branches and apply to branches select component
