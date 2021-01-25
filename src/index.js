@@ -5,7 +5,7 @@ const menu = require('./menu')
 const { spawn } = require('child_process')
 const log = require('electron-log');
 log.transports.file.level = 'debug';
-log.transports.file.fileName = 'elrs-cli.log';
+log.transports.file.fileName = './resources/app/elrs-cli.log';
 log.transports.file.resolvePath = (variables) => {
     return path.join(variables.fileName);
 }
