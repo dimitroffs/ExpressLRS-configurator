@@ -19,7 +19,7 @@ const finishSvgDiv = document.getElementById('finish-svg');
 const uploadSvgDiv = document.getElementById('upload-svg');
 
 // tail log file
-tail = new Tail("./resources/app/elrs-cli.log", { fromBeginning: true, follow: true });
+tail = new Tail("./elrs-cli.log", { fromBeginning: true, follow: true });
 
 tail.on("line", function(data) {
     console.log('LOG: ', data);

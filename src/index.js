@@ -5,22 +5,50 @@ const menu = require('./menu')
 const { spawn } = require('child_process')
 const log = require('electron-log');
 log.transports.file.level = 'debug';
-log.transports.file.fileName = './resources/app/elrs-cli.log';
+log.transports.file.fileName = './elrs-cli.log';
 log.transports.file.resolvePath = (variables) => {
     return path.join(variables.fileName);
 }
 
 const localElrsPythonVenvDir = "./elrs-cli/venv/"
-const localElrsDir = "./resources/app/ExpressLRS/"
+const localElrsDir = "./ExpressLRS/"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
     app.quit();
 }
 
-let mainWindow
+let setupUpdateWindow
+const createSetupWindow = () => {
 
-const createWindow = () => {
+    // create the browser window.
+    setupUpdateWindow = new BrowserWindow({
+        width: 874,
+        height: 300,
+        frame: false,
+        show: false
+    });
+
+    // and load the index.html of the app.
+    setupUpdateWindow.loadFile(path.join(__dirname, 'setup.html'));
+
+    setupUpdateWindow.once('ready-to-show', () => {
+        setupUpdateWindow.show();
+
+        if (needElrsSetup()) {
+            // setup ExpressLRS Python 3 venv locally
+            setupElrsLocally();
+        } else {
+            activateElrsPythonVenv();
+
+            // initialize fetched remoted branches locally
+            // listElrsBranches();
+        }
+    })
+};
+
+let aboutWindow
+const createMainWindow = () => {
 
     aboutWindow = new BrowserWindow({
         width: 390,
@@ -68,19 +96,21 @@ const createWindow = () => {
     const mainMenu = Menu.buildFromTemplate(menu);
     Menu.setApplicationMenu(mainMenu);
 
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
+    // mainWindow.once('ready-to-show', () => {
+    // mainWindow.show();
 
-        if (needElrsSetup()) {
-            // setup ExpressLRS Python 3 venv locally
-            setupElrsLocally();
-        } else {
-            activateElrsPythonVenv();
+    // initialize fetched remoted branches locally
 
-            // initialize fetched remoted branches locally
-            listElrsBranches();
-        }
-    })
+
+    // if (needElrsSetup()) {
+    //     // setup ExpressLRS Python 3 venv locally
+    //     setupElrsLocally();
+    // } else {
+    //     activateElrsPythonVenv();
+
+
+    // }
+    // })
 };
 
 // This method will be called when Electron has finished
@@ -91,7 +121,9 @@ app.on('ready', () => {
         mainWindow.webContents.send('toggle-elrs-console')
     })
 
-    createWindow();
+    createSetupWindow();
+
+    createMainWindow();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -174,9 +206,9 @@ function needElrsGithubRepoClone() {
 let setupElrsProcess = null
 const setupElrsLocally = () => {
     // start event with running spinner loader
-    mainWindow.webContents.send('elrs-setup-started');
+    setupUpdateWindow.webContents.send('elrs-setup-started');
 
-    setupElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/setup.py', '-s']);
+    setupElrsProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-s']);
 
     if (setupElrsProcess != null) {
         log.info('Setting up ExpressLRS locally');
@@ -190,7 +222,7 @@ const setupElrsLocally = () => {
                 log.info('Successfully finished setup ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-setup-success')
+                setupUpdateWindow.webContents.send('elrs-setup-success')
 
                 // check and update local ExpressLRS repository if needed
                 if (needElrsGithubRepoClone()) {
@@ -204,7 +236,7 @@ const setupElrsLocally = () => {
                 log.error('Failed setup ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-setup-failed')
+                setupUpdateWindow.webContents.send('elrs-setup-failed')
             }
         });
     }
@@ -213,9 +245,9 @@ const setupElrsLocally = () => {
 let activatePythonVenvProcess = null
 const activateElrsPythonVenv = () => {
     // start event with running spinner loader
-    mainWindow.webContents.send('elrs-activation-started');
+    setupUpdateWindow.webContents.send('elrs-activation-started');
 
-    activatePythonVenvProcess = spawn('py', ['-3', './resources/app/elrs-cli/setup.py', '-a']);
+    activatePythonVenvProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-a']);
 
     if (activatePythonVenvProcess != null) {
         log.info('Activating ExpressLRS Python venv locally');
@@ -229,7 +261,7 @@ const activateElrsPythonVenv = () => {
                 log.info('Successfully activated ExpressLRS Python venv locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-activation-success')
+                setupUpdateWindow.webContents.send('elrs-activation-success')
 
                 // check and update local ExpressLRS repository if needed
                 if (needElrsGithubRepoClone()) {
@@ -243,7 +275,7 @@ const activateElrsPythonVenv = () => {
                 log.error('Failed activating ExpressLRS Python venv locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-activation-failed')
+                setupUpdateWindow.webContents.send('elrs-activation-failed')
             }
         });
     }
@@ -252,10 +284,10 @@ const activateElrsPythonVenv = () => {
 let cloneElrsProcess = null
 const cloneElrsGithubRepo = () => {
     // start event with running spinner loader
-    mainWindow.webContents.send('elrs-clone-started');
+    setupUpdateWindow.webContents.send('elrs-clone-started');
 
     // execute child process
-    cloneElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-c']);
+    cloneElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-c']);
 
     if (cloneElrsProcess != null) {
         log.info('Cloning ExpressLRS locally');
@@ -274,7 +306,7 @@ const cloneElrsGithubRepo = () => {
                 log.error('Failed cloning ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-clone-failed')
+                setupUpdateWindow.webContents.send('elrs-clone-failed')
             }
         });
     }
@@ -283,9 +315,9 @@ const cloneElrsGithubRepo = () => {
 let pullElrsProcess = null
 const pullElrsGithubRepo = () => {
     // start event with running spinner loader
-    mainWindow.webContents.send('elrs-pull-started');
+    setupUpdateWindow.webContents.send('elrs-pull-started');
 
-    pullElrsProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-p']);
+    pullElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-p']);
 
     if (pullElrsProcess != null) {
         log.info('Updating ExpressLRS locally.');
@@ -298,13 +330,21 @@ const pullElrsGithubRepo = () => {
             if (Number(0) === Number(code)) {
                 log.info('Successfully updated ExpressLRS locally. Exit code: %s', code);
 
-                // send success event for stopping spinner loader
+                // hide setup and update window
+                setupUpdateWindow.hide();
+
+                // show main window
+                mainWindow.show();
+
+                listElrsBranches();
+
+                // send event for success pull
                 mainWindow.webContents.send('elrs-pull-success')
             } else {
                 log.error('Failed updating ExpressLRS locally. Exit code: %s', code);
 
                 // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-pull-failed')
+                setupUpdateWindow.webContents.send('elrs-pull-failed')
             }
         });
     }
@@ -317,7 +357,7 @@ const listElrsBranches = () => {
     mainWindow.webContents.send('update-elrs-branches-started');
 
     // execute child process
-    listElrsBranchesProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-l']);
+    listElrsBranchesProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-l']);
 
     if (listElrsBranchesProcess != null) {
         log.info('Fetching ExpressLRS remote branches locally');
@@ -347,7 +387,7 @@ let resetElrsBranchProcess = null
 const resetElrsBranch = (branch) => {
     mainWindow.webContents.send('elrs-reset-branch-started')
 
-    resetElrsBranchProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-r', branch]);
+    resetElrsBranchProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-r', branch]);
 
     if (resetElrsBranchProcess != null) {
         log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', branch);
@@ -379,7 +419,7 @@ const resetElrsBranch = (branch) => {
 
 let buildElrsFirmwareProcess = null
 const buildElrsFirmwareForTarget = (target) => {
-    buildElrsFirmwareProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-b', '-t', target]);
+    buildElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-b', '-t', target]);
 
     if (buildElrsFirmwareProcess != null) {
         log.info('Building ExpressLRS firmware for target: %s', target);
@@ -411,7 +451,7 @@ const buildElrsFirmwareForTarget = (target) => {
 
 let uploadElrsFirmwareProcess = null
 const uploadElrsFirmwareForTarget = (target) => {
-    uploadElrsFirmwareProcess = spawn('py', ['-3', './resources/app/elrs-cli/elrs-cli.py', '-u', '-t', target]);
+    uploadElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-u', '-t', target]);
 
     if (uploadElrsFirmwareProcess != null) {
         log.info('Started uploading ExpressLRS firmware for target: %s', target);
