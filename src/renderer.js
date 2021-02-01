@@ -1,7 +1,7 @@
 const { shell, ipcRenderer } = require('electron');
 const path = require('path');
 const os = require('os');
-const Tail = require('tail').Tail
+const Tail = require('tail').Tail;
 
 // html dom constants
 const elrsRepoStatusSpinner = document.getElementById('elrs-repo-status-spinner');
@@ -321,6 +321,15 @@ ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) =>
     updateElrsRemoteBranches(fetchedElrsRemoteBranches);
 });
 
+ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) => {
+    // TODO: enable when needed - currently build targets are updated on remote branches update
+    // successElrsStatusMsg("Successfully fetched local PlatformIO build targets");
+
+    updateElrsBuildTargets(fetchedPioBuldTargets);
+});
+
+
+
 function startElrsStatusMsg(msg) {
     // start status spinner
     elrsRepoStatusSpinner.className = "loader-blue-400 ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1"
@@ -366,4 +375,19 @@ function updateElrsRemoteBranches(fetchedRemoteBranches) {
 
     elrsBranchesSelect.appendChild(fragment);
     elrsBranchesSelect.value = "origin/master";
+}
+
+function updateElrsBuildTargets(fetchedPioBuildTargets) {
+    var fragment = document.createDocumentFragment();
+
+    // split remote branches and apply to branches select component
+    fetchedPioBuildTargets.forEach(function(buildTarget, index) {
+        var opt = document.createElement('option');
+        opt.innerHTML = buildTarget;
+        opt.value = buildTarget;
+        opt.className = "bg-gray-100 text-blue-400 py-1 px-1 rounded";
+        fragment.appendChild(opt);
+    });
+
+    elrsBuildTargetsSelect.appendChild(fragment);
 }

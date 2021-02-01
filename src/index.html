@@ -149,38 +149,7 @@
                     <div class="flex-1 ml-4 font-medium text-blue-400">Choose firmware build target</div>
                 </div>
                 <div class="ml-12">
-                    <select name="targets" id="elrs-build-targets" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none">
-                        <option value="Frsky_TX_R9M_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_via_STLINK</option>
-                        <option value="Frsky_TX_R9M_via_stock_BL" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_via_stock_BL</option>
-                        <option value="Frsky_TX_R9M_LITE_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_via_STLINK</option>
-                        <option value="Frsky_TX_R9M_LITE_via_stock_BL" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_via_stock_BL</option>
-                        <option value="Frsky_TX_R9M_LITE_PRO_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_TX_R9M_LITE_PRO_via_STLINK</option>
-                        <option value="Frsky_RX_R9MM_R9MINI_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9MM_R9MINI_via_STLINK</option>
-                        <option value="Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9MM_R9MINI_via_BetaflightPassthrough</option>
-                        <option value="Frsky_RX_R9SLIMPLUS_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_via_STLINK</option>
-                        <option value="Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_via_BetaflightPassthrough</option>
-                        <option value="Frsky_RX_R9SLIMPLUS_OTA_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_OTA_via_STLINK</option>
-                        <option value="Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9SLIMPLUS_OTA_via_BetaflightPassthrough</option>
-                        <option value="Frsky_RX_R9MX_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9MX_via_STLINK</option>
-                        <option value="Frsky_RX_R9MX_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Frsky_RX_R9MX_via_BetaflightPassthrough</option>
-                        <option value="Jumper_RX_R900MINI_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Jumper_RX_R900MINI_via_STLINK</option>
-                        <option value="Jumper_RX_R900MINI_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">Jumper_RX_R900MINI_via_BetaflightPassthrough</option>
-                        <option value="DIY_900_TX_TTGO_V1_SX127x_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_TX_TTGO_V1_SX127x_via_UART</option>
-                        <option value="DIY_900_TX_TTGO_V2_SX127x_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_TX_TTGO_V2_SX127x_via_UART</option>
-                        <option value="DIY_900_TX_ESP32_SX127x_E19_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_TX_ESP32_SX127x_E19_via_UART</option>
-                        <option value="DIY_900_TX_ESP32_SX127x_RFM95_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_TX_ESP32_SX127x_RFM95_via_UART</option>
-                        <option value="DIY_900_RX_ESP8285_SX127x_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_RX_ESP8285_SX127x_via_UART</option>
-                        <option value="DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_900_RX_ESP8285_SX127x_via_BetaflightPassthrough</option>
-                        <option value="DIY_2400_TX_ESP32_SX1280_Mini_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_Mini_via_UART</option>
-                        <option value="DIY_2400_TX_ESP32_SX1280_E28_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_E28_via_UART</option>
-                        <option value="DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_TX_ESP32_SX1280_LORA1280F27_via_UART</option>
-                        <option value="GHOST_ATTO_2400_RX_via_STLINK" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">GHOST_ATTO_2400_RX_via_STLINK</option>
-                        <option value="GHOST_ATTO_2400_RX_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">GHOST_ATTO_2400_RX_via_BetaflightPassthrough</option>
-                        <option value="DIY_2400_RX_ESP8285_SX1280_via_UART" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_RX_ESP8285_SX1280_via_UART</option>
-                        <option value="DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_RX_ESP8285_SX1280_via_BetaflightPassthrough</option>
-                        <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_RX_STM32_CCG_Nano_v0_5</option>
-                        <option value="DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough" class="bg-gray-100 text-blue-400 py-1 px-1 rounded">DIY_2400_RX_STM32_CCG_Nano_v0_5_via_BetaflightPassthrough</option>
-                    </select>
+                    <select name="targets" id="elrs-build-targets" class="bg-blue-400 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none"></select>
                 </div>
             </li>
             <li class="mb-2">
