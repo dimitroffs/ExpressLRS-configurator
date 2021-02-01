@@ -261,18 +261,6 @@ ipcRenderer.on('elrs-upload-failed', (e, target) => {
 })
 
 // Catches menu event and re-send the event to server
-ipcRenderer.on('elrs-setup-started', () => startElrsStatusMsg("Setting up ExpressLRS Python venv"));
-
-ipcRenderer.on('elrs-setup-success', () => successElrsStatusMsg("ExpressLRS Python venv setup complete"));
-
-ipcRenderer.on('elrs-setup-failed', () => errorElrsStatusMsg("Failed setting up ExpressLRS Python venv"));
-
-ipcRenderer.on('elrs-activation-started', () => startElrsStatusMsg("Activating ExpressLRS Python venv"));
-
-ipcRenderer.on('elrs-activation-success', () => successElrsStatusMsg("ExpressLRS Python venv activation complete"));
-
-ipcRenderer.on('elrs-activation-failed', () => errorElrsStatusMsg("Failed activating ExpressLRS Python venv"));
-
 ipcRenderer.on('clone-elrs-repo', () => ipcRenderer.invoke('clone-elrs-repo'));
 
 ipcRenderer.on('pull-elrs-repo', () => ipcRenderer.invoke('pull-elrs-repo'));

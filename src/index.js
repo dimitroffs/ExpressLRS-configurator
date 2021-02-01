@@ -187,8 +187,6 @@ function needElrsGithubRepoClone() {
 
 let setupElrsProcess = null
 const setupElrsLocally = () => {
-    // start event with running spinner loader
-    setupUpdateWindow.webContents.send('elrs-setup-started');
 
     setupElrsProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-s']);
 
@@ -223,8 +221,6 @@ const setupElrsLocally = () => {
 
 let activatePythonVenvProcess = null
 const activateElrsPythonVenv = () => {
-    // start event with running spinner loader
-    setupUpdateWindow.webContents.send('elrs-activation-started');
 
     activatePythonVenvProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-a']);
 
