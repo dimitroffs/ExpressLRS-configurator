@@ -18,8 +18,11 @@ const buildSvgDiv = document.getElementById('build-svg');
 const finishSvgDiv = document.getElementById('finish-svg');
 const uploadSvgDiv = document.getElementById('upload-svg');
 
+// set production dir before generating local os archive of application or use empty string for development
+const srcDir = "./"; // use './resources/app/' for production
+
 // tail log file
-tail = new Tail("./elrs-cli.log", { fromBeginning: true, follow: true });
+tail = new Tail(srcDir + "elrs-cli.log", { fromBeginning: true, follow: true });
 
 tail.on("line", function(data) {
     console.log('LOG: ', data);

@@ -5,14 +5,18 @@ const readline = require('readline');
 const menu = require('./menu')
 const { spawn } = require('child_process')
 const log = require('electron-log');
+
+// set production dir before generating local os archive of application or use empty string for development
+const srcDir = "./"; // use './resources/app/' for production
+
 log.transports.file.level = 'debug';
-log.transports.file.fileName = './elrs-cli.log';
+log.transports.file.fileName = srcDir + 'elrs-cli.log';
 log.transports.file.resolvePath = (variables) => {
     return path.join(variables.fileName);
 }
 
 const localElrsPythonVenvDir = "./elrs-cli/venv/"
-const localElrsDir = "./ExpressLRS/"
+const localElrsDir = srcDir + "ExpressLRS/"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -188,7 +192,7 @@ function needElrsGithubRepoClone() {
 let setupElrsProcess = null
 const setupElrsLocally = () => {
 
-    setupElrsProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-s']);
+    setupElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/setup.py', '-s']);
 
     if (setupElrsProcess != null) {
         log.info('Setting up ExpressLRS locally');
@@ -222,7 +226,7 @@ const setupElrsLocally = () => {
 let activatePythonVenvProcess = null
 const activateElrsPythonVenv = () => {
 
-    activatePythonVenvProcess = spawn('py', ['-3', './elrs-cli/setup.py', '-a']);
+    activatePythonVenvProcess = spawn('py', ['-3', srcDir + 'elrs-cli/setup.py', '-a']);
 
     if (activatePythonVenvProcess != null) {
         log.info('Activating ExpressLRS Python venv locally');
@@ -257,7 +261,7 @@ let autoCloneElrsProcess = null
 const autoCloneElrsGithubRepo = () => {
 
     // execute child process
-    autoCloneElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-c']);
+    autoCloneElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-c']);
 
     if (autoCloneElrsProcess != null) {
         log.info('Cloning ExpressLRS locally');
@@ -289,7 +293,7 @@ const cloneElrsGithubRepo = () => {
     mainWindow.webContents.send('elrs-clone-started');
 
     // execute child process
-    cloneElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-c']);
+    cloneElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-c']);
 
     if (cloneElrsProcess != null) {
         log.info('Cloning ExpressLRS locally');
@@ -317,7 +321,7 @@ const cloneElrsGithubRepo = () => {
 let autoPullElrsProcess = null
 const autoPullElrsGithubRepo = () => {
 
-    autoPullElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-p']);
+    autoPullElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-p']);
 
     if (autoPullElrsProcess != null) {
         log.info('Updating ExpressLRS locally.');
@@ -356,7 +360,7 @@ const pullElrsGithubRepo = () => {
     // start event with running spinner loader
     mainWindow.webContents.send('elrs-pull-started');
 
-    pullElrsProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-p']);
+    pullElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-p']);
 
     if (pullElrsProcess != null) {
         log.info('Updating ExpressLRS locally.');
@@ -388,7 +392,7 @@ const listElrsBranches = () => {
     mainWindow.webContents.send('update-elrs-branches-started');
 
     // execute child process
-    listElrsBranchesProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-l']);
+    listElrsBranchesProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-l']);
 
     if (listElrsBranchesProcess != null) {
         log.info('Fetching ExpressLRS remote branches locally');
@@ -422,7 +426,7 @@ function updateElrsBuildTargets() {
     let fetchedPioBuildTargets = [];
 
     const readInterface = readline.createInterface({
-        input: fs.createReadStream("./ExpressLRS/src/platformio.ini"),
+        input: fs.createReadStream(srcDir + "ExpressLRS/src/platformio.ini"),
         output: process.stdout,
         console: false
     });
@@ -450,7 +454,7 @@ let resetElrsBranchProcess = null
 const resetElrsBranch = (branch) => {
     mainWindow.webContents.send('elrs-reset-branch-started')
 
-    resetElrsBranchProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-r', branch]);
+    resetElrsBranchProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-r', branch]);
 
     if (resetElrsBranchProcess != null) {
         log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', branch);
@@ -482,7 +486,7 @@ const resetElrsBranch = (branch) => {
 
 let buildElrsFirmwareProcess = null
 const buildElrsFirmwareForTarget = (target) => {
-    buildElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-b', '-t', target]);
+    buildElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-b', '-t', target]);
 
     if (buildElrsFirmwareProcess != null) {
         log.info('Building ExpressLRS firmware for target: %s', target);
@@ -514,7 +518,7 @@ const buildElrsFirmwareForTarget = (target) => {
 
 let uploadElrsFirmwareProcess = null
 const uploadElrsFirmwareForTarget = (target) => {
-    uploadElrsFirmwareProcess = spawn('py', ['-3', './elrs-cli/elrs-cli.py', '-u', '-t', target]);
+    uploadElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-u', '-t', target]);
 
     if (uploadElrsFirmwareProcess != null) {
         log.info('Started uploading ExpressLRS firmware for target: %s', target);
