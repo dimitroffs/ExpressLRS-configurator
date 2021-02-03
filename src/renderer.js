@@ -309,12 +309,16 @@ ipcRenderer.on('update-elrs-branches', (e, fetchedElrsRemoteBranches) => {
 ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
     successElrsStatusMsg("Successfully fetched remote ExpressLRS branches");
 
+    elrsBranchesSelect.innerHTML = "";
+
     updateElrsRemoteBranches(fetchedElrsRemoteBranches);
 });
 
 ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) => {
     // TODO: enable when needed - currently build targets are updated on remote branches update
     // successElrsStatusMsg("Successfully fetched local PlatformIO build targets");
+
+    elrsBuildTargetsSelect.innerHTML = "";
 
     updateElrsBuildTargets(fetchedPioBuldTargets);
 });
@@ -346,17 +350,10 @@ function errorElrsStatusMsg(msg) {
 }
 
 function updateElrsRemoteBranches(fetchedRemoteBranches) {
+
     var fragment = document.createDocumentFragment();
 
-    // trim branches string
-    fetchedRemoteBranches = fetchedRemoteBranches.trim();
-
-    // remove start/end brackets for better split
-    var substringEnd = fetchedRemoteBranches.length - 2;
-    fetchedRemoteBranches = fetchedRemoteBranches.substring(2, substringEnd);
-
-    // split remote branches and apply to branches select component
-    fetchedRemoteBranches.split("\', \'").forEach(function(branchName, index) {
+    fetchedRemoteBranches.forEach(function(branchName, index) {
         var opt = document.createElement('option');
         opt.innerHTML = branchName;
         opt.value = branchName;
@@ -369,6 +366,7 @@ function updateElrsRemoteBranches(fetchedRemoteBranches) {
 }
 
 function updateElrsBuildTargets(fetchedPioBuildTargets) {
+
     var fragment = document.createDocumentFragment();
 
     // split remote branches and apply to branches select component
