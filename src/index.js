@@ -403,7 +403,7 @@ const listElrsBranches = () => {
 
                     fetchedRemoteBranches.push(remoteReferenceTrimmed);
 
-                    log.info("Found remote branch: %s", remoteReferenceTrimmed)
+                    log.debug("Found remote branch: %s", remoteReferenceTrimmed)
                 }
             });
         })
@@ -453,38 +453,41 @@ function updateElrsBuildTargets() {
     });
 }
 
-//TODO:
-const resetElrsBranch = (branch) => {
+const resetElrsBranch = (remoteBranchName) => {
     mainWindow.webContents.send('elrs-reset-branch-started')
 
-    resetElrsBranchProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-r', branch]);
+    log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', remoteBranchName);
 
-    if (resetElrsBranchProcess != null) {
-        log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', branch);
+    Git.Repository.open(localElrsDir)
+        .then(function(repo) {
+            repository = repo;
 
-        resetElrsBranchProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
+            return repo.getHeadCommit()
+        })
+        .then(function(targetCommit) {
+            return repository.createBranch(remoteBranchName, targetCommit, false);
+        })
+        .then(function(reference) {
+            return repository.checkoutBranch(reference, {});
+        })
+        .then(function() {
+            return repository.getReferenceCommit("refs/remotes/" + remoteBranchName);
+        })
+        .then(function(commit) {
+            Git.Reset.reset(repository, commit, 3, {});
+        })
+        .then(function() {
+            log.info('Resetting ExpressLRS local repository to remote branch \'%s\' completed successfully', remoteBranchName);
+
+            // send event for successfully finished target build
+            mainWindow.webContents.send('elrs-reset-branch-success')
+        })
+        .catch(function(msg) {
+            log.error('Failed resetting ExpressLRS local repository to remote branch %s. %s', remoteBranchName, msg);
+
+            // send success event for stopping spinner loader
+            mainWindow.webContents.send('elrs-reset-branch-failed')
         });
-
-        resetElrsBranchProcess.stderr.on('data', function(data) {
-            log.error(data.toString());
-        });
-
-        resetElrsBranchProcess.on('exit', (code) => {
-            // if execute code successful - send event for successful build done
-            if (Number(0) === Number(code)) {
-                log.info('Resetting ExpressLRS local repository to remote branch \'%s\' completed successfully. Exit code: %s', branch, code);
-
-                // send event for successfully finished target build
-                mainWindow.webContents.send('elrs-reset-branch-success')
-            } else {
-                log.error('Failed resetting ExpressLRS local repository to remote branch %s. Exit code: %s', branch, code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-reset-branch-failed')
-            }
-        });
-    }
 }
 
 let buildElrsFirmwareProcess = null
