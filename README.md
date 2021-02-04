@@ -1,6 +1,6 @@
 # ExpressLRS-configurator
 
-A simple way to build and flash https://github.com/AlessandroAU/ExpressLRS firmware. Project is on-going - use 'develop' branch for most recent stuff. Project is powered by Python, Electron and Tailwind CSS.
+A simple way to build and flash https://github.com/AlessandroAU/ExpressLRS firmware. Project is on-going - use 'develop' branch for most recent stuff. Project is powered by Python, Electron and Tailwind CSS. Check out [Wiki](https://github.com/dimitroffs/ExpressLRS-configurator/wiki) for more details and sample snapshots.
 
 ### Releases:
  - 0.1.5a - windows-only, separated setup and main processes, dynamically loading build targets (needs python 3 and git locally installed)
