@@ -458,23 +458,18 @@ const resetElrsBranch = (remoteBranchName) => {
 
     log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', remoteBranchName);
 
+
     Git.Repository.open(localElrsDir)
         .then(function(repo) {
             repository = repo;
 
-            return repo.getHeadCommit()
-        })
-        .then(function(targetCommit) {
-            return repository.createBranch(remoteBranchName, targetCommit, false);
-        })
-        .then(function(reference) {
-            return repository.checkoutBranch(reference, {});
+            return repository.fetch('origin');
         })
         .then(function() {
-            return repository.getReferenceCommit("refs/remotes/" + remoteBranchName);
+            return repository.getBranchCommit(remoteBranchName);
         })
-        .then(function(commit) {
-            Git.Reset.reset(repository, commit, 3, {});
+        .then(function(originBranchCommit) {
+            return Git.Reset.reset(repository, originBranchCommit, Git.Reset.TYPE.HARD, {});
         })
         .then(function() {
             log.info('Resetting ExpressLRS local repository to remote branch \'%s\' completed successfully', remoteBranchName);
