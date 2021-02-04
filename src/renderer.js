@@ -309,12 +309,16 @@ ipcRenderer.on('update-elrs-branches', (e, fetchedElrsRemoteBranches) => {
 ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
     successElrsStatusMsg("Successfully fetched remote ExpressLRS branches");
 
+    elrsBranchesSelect.innerHTML = "";
+
     updateElrsRemoteBranches(fetchedElrsRemoteBranches);
 });
 
 ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) => {
     // TODO: enable when needed - currently build targets are updated on remote branches update
     // successElrsStatusMsg("Successfully fetched local PlatformIO build targets");
+
+    elrsBuildTargetsSelect.innerHTML = "";
 
     updateElrsBuildTargets(fetchedPioBuldTargets);
 });
