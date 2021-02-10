@@ -48,9 +48,9 @@ args = parser.parse_args()
 
 # Python pip install or update package function
 def pipInstallOrUpdate(package):
-    logger.info("Executing 'pip install -U {}'".format(package))
+    logger.info(f"Executing 'pip install -U {package}'")
     subprocess.check_call(['pip', 'install', '-U', package])
-    logger.info("Successfully executed 'pip install -U {}'".format(package))
+    logger.info(f"Successfully executed 'pip install -U {package}'")
 
 def activateVenv():
     # TODO: check os and apply correct path

@@ -55,7 +55,7 @@ args = parser.parse_args()
 # Github clone whole ExpressLRS repository function
 @yaspin(text="[ExpressLRS clone] ", color="cyan")
 def cloneElrsGithubRepo():
-    logger.info("Cloning ExpressLRS GitHub repository in local directory: {}".format(elrsrepopath))
+    logger.info("Cloning ExpressLRS GitHub repository in local directory: {elrsrepopath}")
     git.cmd.Git(elrsrepopath).clone("https://github.com/AlessandroAU/ExpressLRS.git")
     logger.info("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
 
@@ -90,9 +90,9 @@ def fetchElrsGithubRepoBranches():
 
 # Reset current ExpressLRS local repository to specific branch
 def resetElrsLocalRepositoryToBranch(branch):
-    logger.info("Resetting ExpressLRS local repository to remote '{}' branch".format(branch))
+    logger.info(f"Resetting ExpressLRS local repository to remote '{branch}' branch")
     logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').reset('--hard', branch))
-    logger.info("Successfully reset ExpressLRS local repository to remote '{}' branch".format(branch))
+    logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
 
 
 # ExpressLRS PlatformIO build target function
@@ -101,11 +101,11 @@ def pioBuild(target):
         logger.info("ExpressLRS CLI '-b (build)' needs '-t (target)' parameter")
         exit(1)
     else:
-        logger.info("ExpressLRS CLI build target: {}".format(target))
+        logger.info(f"ExpressLRS CLI build target: {target}")
         pullElrsGithubRepo()
-        logger.info("Executing PlatformIO CLI 'build' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir, target))
+        logger.info("Executing PlatformIO CLI 'build' from directory [{srcdir}] for ExpressLRS target [{target}] firmware")
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--environment', target])
-        logger.info("Successfully executed PlatformIO CLI 'build' for ExpressLRS target [{}] firmware".format(target))
+        logger.info("Successfully executed PlatformIO CLI 'build' for ExpressLRS target [{target}] firmware")
 
 
 # ExpressLRS PlatformIO upload target function
@@ -115,9 +115,9 @@ def pioUpload(target):
         exit(1)
     else:
         pullElrsGithubRepo()
-        logger.info("Executing PlatformIO CLI 'upload' from directory [{}] for ExpressLRS target [{}] firmware".format(srcdir, target))
+        logger.info("Executing PlatformIO CLI 'upload' from directory [{srcdir}] for ExpressLRS target [{target}] firmware")
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--target', 'upload', '--environment', target])
-        logger.info("Successfully executed PlatformIO CLI 'upload' for ExpressLRS target [{}] firmware".format(target))
+        logger.info("Successfully executed PlatformIO CLI 'upload' for ExpressLRS target [{target}] firmware")
 
 
 if args.clone:
