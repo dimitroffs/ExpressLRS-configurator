@@ -76,11 +76,11 @@ def fetchElrsGithubRepoBranches():
         localRepo.fetch('--all')
         allRemoteBranches = localRepo.branch('-r').split('\n')
         allRemoteBranchesNames = [b.strip() for b in allRemoteBranches]
-        logger.info("Successfully fetched total {} ExpressLRS branches from GitHub repository".format(len(allRemoteBranchesNames)))
+        logger.info(f"Successfully fetched total {len(allRemoteBranchesNames)} ExpressLRS branches from GitHub repository")
 
         # HEAD is not needed in this list
         remoteBranchesNames = [ b for b in allRemoteBranchesNames if not 'origin/HEAD' in b]
-        logger.info("Only {} ExpressLRS branches useful from origin".format(len(remoteBranchesNames)))
+        logger.info(f"Only {len(remoteBranchesNames)} ExpressLRS branches useful from origin")
 
         return remoteBranchesNames
     except Exception as e:
