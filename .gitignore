@@ -97,3 +97,6 @@ ExpressLRS/
  
 # VSC ignore config
 .vscode/
+setup/win/PortableGit-2.30.1-64-bit/
+
+setup/win/python-3.8.8-embed-amd64/

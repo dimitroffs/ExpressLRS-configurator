@@ -26,18 +26,33 @@ import os
 import subprocess
 import sys
 
-import git
-from yaspin import yaspin
-
-# Organize folder names
 scriptpath = os.path.realpath(__file__)
 elrsrepopath = scriptpath[0:-len("/elrs-cli/elrs-cli.py")]
+
+git_dir = os.path.join(elrsrepopath, "setup", "win", "PortableGit-2.30.1-64-bit", "cmd")
+# Make sure it's at the beginning of the PATH
+os.environ["PATH"] = os.pathsep.join([git_dir]) + os.pathsep + os.environ["PATH"]
+# NOW import it
+
+import git
+
+gitVersion = git.cmd.Git(elrsrepopath + '/ExpressLRS').version_info
+# from yaspin import yaspin
+
+# Organize folder names
+
+
 srcdir = os.path.join(elrsrepopath, "ExpressLRS", "src")
 
 # Logger config
 loggerfilename = os.path.join(elrsrepopath, "elrs-cli.log")
-logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
-                    format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
+# logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
+#                     format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
+logging.basicConfig(handlers=[logging.FileHandler(filename=loggerfilename, 
+                                                 encoding='utf-8', mode='a+')],
+                    format="%(asctime)s %(name)s:%(levelname)s:%(message)s", 
+                    datefmt="%F %A %T", 
+                    level=logging.DEBUG)
 logger = logging.getLogger('elrs-cli')
 
 # Initialize argument parser for ExpressLRS CLI
@@ -53,19 +68,21 @@ parser.add_argument("-u", "--upload", action="store_true", help="upload ExpressL
 args = parser.parse_args()
 
 # Github clone whole ExpressLRS repository function
-@yaspin(text="[ExpressLRS clone] ", color="cyan")
+# @yaspin(text="[ExpressLRS clone] ", color="cyan")
 def cloneElrsGithubRepo():
-    logger.info("Cloning ExpressLRS GitHub repository in local directory: {elrsrepopath}")
+    logger.debug("Using Git version: {0}".format(gitVersion))
+    logger.debug("Cloning ExpressLRS GitHub repository in local directory: {elrsrepopath}")
     git.cmd.Git(elrsrepopath).clone("https://github.com/AlessandroAU/ExpressLRS.git")
-    logger.info("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.debug("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Github pull latest ExpressLRS repository master branch function
-@yaspin(text="[ExpressLRS pull] ", color="cyan")
+# @yaspin(text="[ExpressLRS pull] ", color="cyan")
 def pullElrsGithubRepo():
-    logger.info("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.debug("Using Git version: {0}".format(gitVersion))
+    logger.debug("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
     logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
-    logger.info("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.debug("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Helper function to get all ExpressLRS remote branches from GitHub repository

@@ -25,13 +25,11 @@ const srcDir = "./"; // use './resources/app/' for production
 tail = new Tail(srcDir + "elrs-cli.log", { fromBeginning: true, follow: true });
 
 tail.on("line", function(data) {
-    console.log('LOG: ', data);
     logAreaText.value += data + '\n';
     autoScrollLogAreaText();
 });
 
 tail.on("error", function(error) {
-    console.log('ERROR: ', error);
     logAreaText.value += data + '\n';
     autoScrollLogAreaText();
 });
@@ -302,7 +300,7 @@ ipcRenderer.on('open-about', () => {
     ipcRenderer.invoke('open-about-clicked')
 });
 
-ipcRenderer.on('update-elrs-branches', (e, fetchedElrsRemoteBranches) => {
+ipcRenderer.on('update-elrs-branches', () => {
     ipcRenderer.invoke('update-elrs-branches-clicked')
 });
 
@@ -323,7 +321,10 @@ ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) =
     updateElrsBuildTargets(fetchedPioBuldTargets);
 });
 
-
+ipcRenderer.on('version', (e, appVersion) => {
+    // fetch and set configurator version
+    document.getElementById('app-version-span').innerText = appVersion;
+});
 
 function startElrsStatusMsg(msg) {
     // start status spinner

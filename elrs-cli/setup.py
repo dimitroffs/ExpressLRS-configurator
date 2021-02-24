@@ -35,8 +35,13 @@ elrsrepopath = scriptpath[0:-len("/elrs-cli/setup.py")]
 
 # Logger config
 loggerfilename = os.path.join(elrsrepopath, "elrs-cli.log")
-logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
-                    format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
+# logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
+#                     format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
+logging.basicConfig(handlers=[logging.FileHandler(filename=loggerfilename, 
+                                                 encoding='utf-8', mode='a+')],
+                    format="%(asctime)s %(name)s:%(levelname)s:%(message)s", 
+                    datefmt="%F %A %T", 
+                    level=logging.DEBUG)
 logger = logging.getLogger('setup')
 
 # Initialize argument parser for ExpressLRS CLI setup
@@ -63,31 +68,34 @@ def deactivateVenv():
     subprocess.check_call(['.\elrs-cli\\venv\Scripts\\deactivate.bat'], shell=True)
 
 def setupVenv():
-    logger.info("Starting setup Python 3 venv for ExpressLRS CLI")
+    logger.info("check python embeddded version")
+    subprocess.check_call([sys.executable, '--version'], shell=True)
 
-    cwd = os.getcwd()
-    os.chdir(cwd)
-    venv = os.path.join(cwd, VENV_DIR)
+    # logger.info("Starting setup Python 3 venv for ExpressLRS CLI")
 
-    logger.info("Creating Python 3 venv for ExpressLRS CLI")
-    subprocess.check_call([sys.executable, '-m', 'venv', VENV_DIR], shell=True)
+    # cwd = os.getcwd()
+    # os.chdir(cwd)
+    # venv = os.path.join(cwd, VENV_DIR)
 
-    # activate venv
-    activateVenv()
+    # logger.info("Creating Python 3 venv for ExpressLRS CLI")
+    # subprocess.check_call([sys.executable, '-m', 'venv', VENV_DIR], shell=True)
 
-    logger.info("Updating pip package manager")
-    subprocess.check_call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], shell=True)
+    # # activate venv
+    # activateVenv()
 
-    # install GitPython
-    pipInstallOrUpdate('gitpython')
+    # logger.info("Updating pip package manager")
+    # subprocess.check_call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], shell=True)
 
-    # install yaspin
-    pipInstallOrUpdate('yaspin')
+    # # install GitPython
+    # pipInstallOrUpdate('gitpython')
 
-    # install PlatformIO
-    pipInstallOrUpdate('platformio')
+    # # install yaspin
+    # pipInstallOrUpdate('yaspin')
 
-    logger.info("Finished setup Python 3 venv for ExpressLRS CLI")
+    # # install PlatformIO
+    # pipInstallOrUpdate('platformio')
+
+    # logger.info("Finished setup Python 3 venv for ExpressLRS CLI")
 
 if args.setup:
     setupVenv()
