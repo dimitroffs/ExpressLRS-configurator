@@ -57,22 +57,27 @@ function runScript(command, args, callback) {
 
     // fetch error
     child.on('error', (error) => {
-        dialog.showMessageBox({
-            title: 'Error',
-            type: 'error',
-            message: 'Unable to execute script \'' + command + '\'. Error: \r\n' + error
-        }).then((data) => {
-            log.debug("Clicked dialog button #" + data.response);
-            if (0 === data.response) {
-                app.quit();
-            }
-        });
+        // log error data
+        error = error.toString();
+        log.error(error);
+
+        // TODO: show more cool-looking notifications
+        // dialog.showMessageBox({
+        //     title: 'Error',
+        //     type: 'error',
+        //     message: 'Unable to execute script \'' + command + '\'. Error: \r\n' + error
+        // }).then((data) => {
+        //     log.debug("Clicked dialog button #" + data.response);
+        //     if (0 === data.response) {
+        //         app.quit();
+        //     }
+        // });
     });
 
     // fetch stdout
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (data) => {
-        // log output data
+        // log stdout data
         data = data.toString();
         log.info(data);
     });
@@ -80,8 +85,11 @@ function runScript(command, args, callback) {
     // fetch stderr
     child.stderr.setEncoding('utf8');
     child.stderr.on('data', (data) => {
+        // log stderr data
+        data = data.toString();
         log.error(data);
 
+        // TODO: show more cool-looking notifications
         dialog.showMessageBox({
             title: 'Error',
             type: 'error',
@@ -319,7 +327,7 @@ function localFileExists(path) {
 
 const winDirPythonEmbedded = "./setup/win/python-3.8.8-embed-amd64/python.exe";
 
-const cloneExpressLRS = () => {
+function cloneExpressLRS() {
 
     // TODO: check if we already have git installed
     log.info("Checking for already cloned ExpressLRS project");
@@ -336,7 +344,7 @@ const cloneExpressLRS = () => {
     }
 }
 
-const pullExpressLRS = () => {
+function pullExpressLRS() {
 
     // TODO: check if we already have git installed
     log.info("Updating local ExpressLRS project");
@@ -349,7 +357,8 @@ const pullExpressLRS = () => {
 
 
 let installGitProcess = null
-const extractWinGit = () => {
+
+function extractWinGit() {
 
     // TODO: check if we already have git installed. Currently using Portable git version.
 
@@ -368,20 +377,44 @@ const extractWinGit = () => {
     }
 }
 
-const installLinuxGit = () => {}
-const installMacGit = () => {}
+function installLinuxGit() {}
+
+function installMacGit() {}
 
 // cross-platform Git install procedures
-const installGit = byOS({
-    [platforms.WINDOWS]: extractWinGit(),
-    [platforms.LINUX]: installLinuxGit(),
-    [platforms.MAC]: installMacGit(),
-    default: log.error("Unable to install Python locally! Not supported OS is used!"),
-});
+function installGit() {
+    byOS({
+        [platforms.WINDOWS]: extractWinGit(),
+        [platforms.LINUX]: installLinuxGit(),
+        [platforms.MAC]: installMacGit(),
+    });
+}
+
+let installPythonToolsProcess = null;
+
+function installWinPythonTools() {
+    log.info("Installing Python tools needed for ExpressLRS");
+
+    // install Python tools for ExpressLRS
+    installPythonToolsProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/setup.py\" -s\"\""], installGit);
+}
+
+function installLinuxPythonTools() {}
+
+function installMacPythonTools() {}
+
+// cross-platform ExpressLRS Python tools install procedures - should be called once after Python installation
+function installPythonTools() {
+    byOS({
+        [platforms.WINDOWS]: installWinPythonTools(),
+        [platforms.LINUX]: installLinuxPythonTools(),
+        [platforms.MAC]: installMacPythonTools(),
+    });
+}
 
 let installPythonProcess = null;
-const extractWinPython = () => {
 
+function extractWinPython() {
     log.info("Checking for local Python embedded installation");
 
     if (!localFileExists(winDirPythonEmbedded)) {
@@ -389,26 +422,29 @@ const extractWinPython = () => {
         log.info("Local Python embedded not found! Starting installation...");
 
         // install Python embedded
-        installPythonProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/python-3.8.8-embed-amd64.7z\" -o./setup/win -aos\"\""], installGit);
+        installPythonProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/python-3.8.8-embed-amd64.7z\" -o./setup/win -aos\"\""], installPythonTools);
     } else {
         log.info("Found local Python embedded installation");
         installGit();
     }
 }
 
-const installLinuxPython = () => {}
-const installMacPython = () => {}
+function installLinuxPython() {}
+
+function installMacPython() {}
 
 // cross-platform Python install procedures
-const installPython = byOS({
-    [platforms.WINDOWS]: extractWinPython(),
-    [platforms.LINUX]: installLinuxPython(),
-    [platforms.MAC]: installMacPython(),
-    default: log.error("Unable to install Python locally! Not supported OS is used!"),
-});
+function installPython() {
+    byOS({
+        [platforms.WINDOWS]: extractWinPython(),
+        [platforms.LINUX]: installLinuxPython(),
+        [platforms.MAC]: installMacPython(),
+    });
+}
 
 let setupElrsProcess = null
-const setupWinElrsLocally = () => {
+
+function setupWinElrsLocally() {
 
     log.info("Checking for local 7-Zip installation");
 
@@ -425,16 +461,18 @@ const setupWinElrsLocally = () => {
     }
 }
 
-const setupLinuxElrsLocally = () => {}
-const setupMacElrsLocally = () => {}
+function setupLinuxElrsLocally() {}
+
+function setupMacElrsLocally() {}
 
 // cross-platform setup procedures
-const setupElrsLocally = byOS({
-    [platforms.WINDOWS]: setupWinElrsLocally(),
-    [platforms.LINUX]: setupLinuxElrsLocally(),
-    [platforms.MAC]: setupMacElrsLocally(),
-    default: log.error("Unable to setup ExpressLRS locally! Not supported OS is used!"),
-});
+function setupElrsLocally() {
+    byOS({
+        [platforms.WINDOWS]: setupWinElrsLocally(),
+        [platforms.LINUX]: setupLinuxElrsLocally(),
+        [platforms.MAC]: setupMacElrsLocally(),
+    });
+}
 
 
 

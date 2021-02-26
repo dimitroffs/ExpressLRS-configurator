@@ -16,18 +16,18 @@
 #  OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 #  OTHER DEALINGS IN THE SOFTWARE.
 
-#  This is ExpressLRS CLI setup application. Intended to work setup all needed libraries for ExpressLRS CLI python project.
+#  This is ExpressLRS CLI setup application. Intended to prepare all needed libraries for ExpressLRS CLI python project.
 
 import argparse
 import os
 import logging
 import subprocess
 import sys
+# import platform
 
 # Declare constants
-VENV_PARENT_DIR = "elrs-cli"
-VENV_DIR = os.path.join(VENV_PARENT_DIR, "venv")
-
+# CLI_DIR = "elrs-cli"
+# VENV_DIR = os.path.join(VENV_PARENT_DIR, "venv")
 
 # Organize folder names
 scriptpath = os.path.realpath(__file__)
@@ -46,65 +46,55 @@ logger = logging.getLogger('setup')
 
 # Initialize argument parser for ExpressLRS CLI setup
 parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--setup", action="store_true", help="setup ExpressLRS Python 3 venv locally")
-parser.add_argument("-a", "--activate", action="store_true", help="activate ExpressLRS Python 3 venv locally")
-parser.add_argument("-d", "--deactivate", action="store_true", help="deactivate ExpressLRS Python 3 venv locally")
+parser.add_argument("-s", "--setup", action="store_true", help="setup ExpressLRS Python tools needed")
+# parser.add_argument("-a", "--activate", action="store_true", help="activate ExpressLRS Python 3 venv locally")
+# parser.add_argument("-d", "--deactivate", action="store_true", help="deactivate ExpressLRS Python 3 venv locally")
 args = parser.parse_args()
 
-# Python pip install or update package function
-def pipInstallOrUpdate(package):
-    logger.info(f"Executing 'pip install -U {package}'")
-    subprocess.check_call(['pip', 'install', '-U', package])
-    logger.info(f"Successfully executed 'pip install -U {package}'")
+# def activateVenv():
+#     # TODO: check os and apply correct path
+#     logger.info("Activating Python 3 venv for ExpressLRS CLI")
+#     subprocess.check_call(['.\elrs-cli\\venv\Scripts\\activate.bat'], shell=True)
 
-def activateVenv():
-    # TODO: check os and apply correct path
-    logger.info("Activating Python 3 venv for ExpressLRS CLI")
-    subprocess.check_call(['.\elrs-cli\\venv\Scripts\\activate.bat'], shell=True)
+# def deactivateVenv():
+#     # TODO: check os and apply correct path
+#     logger.info("Deactivating Python 3 venv for ExpressLRS CLI")
+#     subprocess.check_call(['.\elrs-cli\\venv\Scripts\\deactivate.bat'], shell=True)
 
-def deactivateVenv():
-    # TODO: check os and apply correct path
-    logger.info("Deactivating Python 3 venv for ExpressLRS CLI")
-    subprocess.check_call(['.\elrs-cli\\venv\Scripts\\deactivate.bat'], shell=True)
+def setupPythonTools():
 
-def setupVenv():
-    logger.info("check python embeddded version")
-    subprocess.check_call([sys.executable, '--version'], shell=True)
+    logger.debug("Starting setup Python tools needed for ExpressLRS CLI")
 
-    # logger.info("Starting setup Python 3 venv for ExpressLRS CLI")
+    getPipPath = os.path.join(elrsrepopath, "elrs-cli", "get-pip.py")
+    getPlatformIOPath = os.path.join(elrsrepopath, "elrs-cli", "get-platformio.py")
+    
+    # install pip
+    logger.debug("Installing pip package manager")
+    subprocess.check_call([sys.executable, getPipPath], shell=True)
 
-    # cwd = os.getcwd()
-    # os.chdir(cwd)
-    # venv = os.path.join(cwd, VENV_DIR)
-
-    # logger.info("Creating Python 3 venv for ExpressLRS CLI")
-    # subprocess.check_call([sys.executable, '-m', 'venv', VENV_DIR], shell=True)
-
-    # # activate venv
-    # activateVenv()
-
-    # logger.info("Updating pip package manager")
-    # subprocess.check_call(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], shell=True)
+    # TODO: depending on OS, determine pip path, so we have it on PATH
+    # if ('Windows' == platform.system()):
+    #     pipScriptDir = os.path.join(elrsrepopath, "setup", "win", "python-3.8.8-embed-amd64", "Scripts")
+    #     os.environ["PATH"] = os.pathsep.join([pipScriptDir]) + os.pathsep + os.environ["PATH"]
 
     # # install GitPython
-    # pipInstallOrUpdate('gitpython')
+    # logger.debug("Installing GitPython")
+    # subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'gitpython'], shell=True)
 
-    # # install yaspin
-    # pipInstallOrUpdate('yaspin')
+    # install PlatformIO
+    logger.debug("Installing PlatformIO")
+    subprocess.check_call([sys.executable, getPipPath], shell=True)
 
-    # # install PlatformIO
-    # pipInstallOrUpdate('platformio')
-
-    # logger.info("Finished setup Python 3 venv for ExpressLRS CLI")
+    logger.debug("Finished setup Python tools needed for ExpressLRS CLI")
 
 if args.setup:
-    setupVenv()
-    exit(0)
+    setupPythonTools()
+    sys.exit(0)
 
-if args.activate:
-    activateVenv()
-    exit(0)
+# if args.activate:
+#     activateVenv()
+#     exit(0)
 
-if args.deactivate:
-    deactivateVenv()
-    exit(0)
+# if args.deactivate:
+#     deactivateVenv()
+#     exit(0)

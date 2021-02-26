@@ -27,25 +27,29 @@ import subprocess
 import sys
 
 scriptpath = os.path.realpath(__file__)
-elrsrepopath = scriptpath[0:-len("/elrs-cli/elrs-cli.py")]
 
-git_dir = os.path.join(elrsrepopath, "setup", "win", "PortableGit-2.30.1-64-bit", "cmd")
+# TODO: rename to configurator path
+PROJECT_DIR = scriptpath[0:-len("/elrs-cli/elrs-cli.py")]
+ELRS_REPO_DIR = os.path.join(PROJECT_DIR, 'ExpressLRS')
+
+GIT_EXEC_DIR = os.path.join(PROJECT_DIR, "setup", "win", "PortableGit-2.30.1-64-bit", "cmd")
 # Make sure it's at the beginning of the PATH
-os.environ["PATH"] = os.pathsep.join([git_dir]) + os.pathsep + os.environ["PATH"]
+os.environ["PATH"] = os.pathsep.join([GIT_EXEC_DIR]) + os.pathsep + os.environ["PATH"]
 # NOW import it
 
-import git
+# import git
 
-gitVersion = git.cmd.Git(elrsrepopath + '/ExpressLRS').version_info
+# gitVersion = git.cmd.Git(PROJECT_DIR + '/ExpressLRS').version_info
+
 # from yaspin import yaspin
 
 # Organize folder names
 
 
-srcdir = os.path.join(elrsrepopath, "ExpressLRS", "src")
+srcdir = os.path.join(PROJECT_DIR, "ExpressLRS", "src")
 
 # Logger config
-loggerfilename = os.path.join(elrsrepopath, "elrs-cli.log")
+loggerfilename = os.path.join(PROJECT_DIR, "elrs-cli.log")
 # logging.basicConfig(filename=loggerfilename, encoding='utf-8', level=logging.DEBUG,
 #                     format='%(asctime)s %(name)-8s %(levelname)-8s %(message)s', datefmt='%y-%m-%d %H:%M:%S')
 logging.basicConfig(handlers=[logging.FileHandler(filename=loggerfilename, 
@@ -70,46 +74,63 @@ args = parser.parse_args()
 # Github clone whole ExpressLRS repository function
 # @yaspin(text="[ExpressLRS clone] ", color="cyan")
 def cloneElrsGithubRepo():
-    logger.debug("Using Git version: {0}".format(gitVersion))
-    logger.debug("Cloning ExpressLRS GitHub repository in local directory: {elrsrepopath}")
-    git.cmd.Git(elrsrepopath).clone("https://github.com/AlessandroAU/ExpressLRS.git")
+    # logger.debug("Using Git version: {0}".format(gitVersion))
+    logger.debug("Cloning ExpressLRS GitHub repository in local directory: {PROJECT_DIR}")
+
+    subprocess.check_call(['git', '--version'])
+    subprocess.check_call(['git', 'clone', '--filter=blob:none', '--sparse', 'https://github.com/AlessandroAU/ExpressLRS.git'])
+    
+    os.chdir(ELRS_REPO_DIR)
+    
+    subprocess.check_call(['git', 'sparse-checkout', 'init', '--cone'])
+    subprocess.check_call(['git', 'sparse-checkout', 'set', 'src'])
+    subprocess.check_call(['git', 'config', 'pull.rebase', 'true'])
+
+    # git.cmd.Git(PROJECT_DIR).clone("https://github.com/AlessandroAU/ExpressLRS.git")
     logger.debug("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Github pull latest ExpressLRS repository master branch function
 # @yaspin(text="[ExpressLRS pull] ", color="cyan")
 def pullElrsGithubRepo():
-    logger.debug("Using Git version: {0}".format(gitVersion))
+    # logger.debug("Using Git version: {0}".format(gitVersion))
     logger.debug("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
-    logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').pull('origin', 'master'))
+    
+    os.chdir(ELRS_REPO_DIR)
+
+    subprocess.check_call(['git', '--version'])
+    subprocess.check_call(['git', 'pull'])
+
+    # logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').pull('origin', 'master'))
+    
     logger.debug("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Helper function to get all ExpressLRS remote branches from GitHub repository
-def fetchElrsGithubRepoBranches():
-    try:
-        logger.info("Fetching latest ExpressLRS branches from GitHub repository")
-        localRepo = git.cmd.Git(elrsrepopath + '/ExpressLRS')
-        localRepo.fetch('--all')
-        allRemoteBranches = localRepo.branch('-r').split('\n')
-        allRemoteBranchesNames = [b.strip() for b in allRemoteBranches]
-        logger.info(f"Successfully fetched total {len(allRemoteBranchesNames)} ExpressLRS branches from GitHub repository")
+# def fetchElrsGithubRepoBranches():
+#     try:
+#         logger.info("Fetching latest ExpressLRS branches from GitHub repository")
+#         localRepo = git.cmd.Git(PROJECT_DIR + '/ExpressLRS')
+#         localRepo.fetch('--all')
+#         allRemoteBranches = localRepo.branch('-r').split('\n')
+#         allRemoteBranchesNames = [b.strip() for b in allRemoteBranches]
+#         logger.info(f"Successfully fetched total {len(allRemoteBranchesNames)} ExpressLRS branches from GitHub repository")
 
-        # HEAD is not needed in this list
-        remoteBranchesNames = [ b for b in allRemoteBranchesNames if not 'origin/HEAD' in b]
-        logger.info(f"Only {len(remoteBranchesNames)} ExpressLRS branches useful from origin")
+#         # HEAD is not needed in this list
+#         remoteBranchesNames = [ b for b in allRemoteBranchesNames if not 'origin/HEAD' in b]
+#         logger.info(f"Only {len(remoteBranchesNames)} ExpressLRS branches useful from origin")
 
-        return remoteBranchesNames
-    except Exception as e:
-        logger.error("Unable to fetch ExpressLRS GirHub repository branches")
-        return []
+#         return remoteBranchesNames
+#     except Exception as e:
+#         logger.error("Unable to fetch ExpressLRS GirHub repository branches")
+#         return []
 
 
-# Reset current ExpressLRS local repository to specific branch
-def resetElrsLocalRepositoryToBranch(branch):
-    logger.info(f"Resetting ExpressLRS local repository to remote '{branch}' branch")
-    logger.info(git.cmd.Git(elrsrepopath + '/ExpressLRS').reset('--hard', branch))
-    logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
+# # Reset current ExpressLRS local repository to specific branch
+# def resetElrsLocalRepositoryToBranch(branch):
+#     logger.info(f"Resetting ExpressLRS local repository to remote '{branch}' branch")
+#     logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').reset('--hard', branch))
+#     logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
 
 
 # ExpressLRS PlatformIO build target function
@@ -146,12 +167,12 @@ if args.pull:
     exit(0)
 
 if args.list:
-    print(fetchElrsGithubRepoBranches())
+    # print(fetchElrsGithubRepoBranches())
     exit(0)
 
 if args.reset:
     branch = args.reset
-    resetElrsLocalRepositoryToBranch(branch)
+    # resetElrsLocalRepositoryToBranch(branch)
     exit(0)
 
 # fetch build/upload target from CLI args
