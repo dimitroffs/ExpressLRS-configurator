@@ -40,93 +40,15 @@ const findHandlerOrDefault = (handlerName, dictionary) => {
 
 const byOS = findHandlerOrDefault.bind(null, currentPlatform);
 
-
-
-
-
-
-// helper function to run script in terminal
-function runScript(command, args, callback) {
-    log.info('Executing script: ' + command + ' ' + args);
-
-    // spawn os subprocess
-    var child = spawn(command, args, {
-        encoding: 'utf8',
-        shell: true
-    });
-
-    // fetch error
-    child.on('error', (error) => {
-        // log error data
-        error = error.toString();
-        log.error(error);
-
-        // TODO: show more cool-looking notifications
-        // dialog.showMessageBox({
-        //     title: 'Error',
-        //     type: 'error',
-        //     message: 'Unable to execute script \'' + command + '\'. Error: \r\n' + error
-        // }).then((data) => {
-        //     log.debug("Clicked dialog button #" + data.response);
-        //     if (0 === data.response) {
-        //         app.quit();
-        //     }
-        // });
-    });
-
-    // fetch stdout
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', (data) => {
-        // log stdout data
-        data = data.toString();
-        log.info(data);
-    });
-
-    // fetch stderr
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', (data) => {
-        // log stderr data
-        data = data.toString();
-        log.error(data);
-
-        // TODO: show more cool-looking notifications
-        dialog.showMessageBox({
-            title: 'Error',
-            type: 'error',
-            message: 'Unable to execute script:\r\n \'' + command + ' ' + args + '\'. \r\nError: \r\n' + data
-        }).then((data) => {
-            log.debug("Clicked dialog button #" + data.response);
-            if (0 === data.response) {
-                app.quit();
-            }
-        });
-    });
-
-    // fetch dialog close event
-    child.on('close', (code) => {
-        switch (code) {
-            case 0:
-                {
-                    log.info('Successfully executed script: ' + command + ' ' + args);
-
-                    // run success callback function
-                    if (typeof callback === 'function') {
-                        callback();
-                    }
-
-                    break;
-                }
-        }
-    });
-
-    return child;
-}
-
 // get configurator version
 const appVersion = '' + app.getVersion();
 
 // set production dir before generating local os archive of application or use empty string for development
 const srcDir = "./"; // use './resources/app/' for production
+
+const winDir7zip = "C:/Program Files/7-Zip/7z.exe";
+const winDirPythonEmbedded = srcDir + "setup/win/python-3.8.8-embed-amd64/python.exe";
+const winDirPortableGit = srcDir + "setup/win/PortableGit-2.30.1-64-bit/git-bash.exe";
 
 log.transports.file.level = 'debug';
 log.transports.file.fileName = srcDir + 'elrs-cli.log';
@@ -141,7 +63,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
     app.quit();
 }
 
-let setupUpdateWindow
+let setupUpdateWindow = null;
 const createSetupWindow = () => {
 
     // create the browser window.
@@ -167,7 +89,7 @@ const createSetupWindow = () => {
     })
 };
 
-let aboutWindow
+let aboutWindow = null;
 const createAboutWindow = () => {
 
     aboutWindow = new BrowserWindow({
@@ -306,12 +228,80 @@ ipcMain.handle('update-elrs-branches-clicked', () => {
     listElrsBranches();
 });
 
-function needElrsGithubRepoClone() {
-    if (!fs.existsSync(localElrsDir)) {
-        return true;
-    } else {
-        return false;
-    }
+// helper function to run script in terminal
+function runScript(command, args, callback) {
+    log.info('Executing script: ' + command + ' ' + args);
+
+    // spawn os subprocess
+    var child = spawn(command, args, {
+        encoding: 'utf8',
+        shell: true
+    });
+
+    // fetch error
+    child.on('error', (error) => {
+        // log error data
+        error = error.toString();
+        log.error(error);
+
+        // TODO: show more cool-looking notifications
+        // dialog.showMessageBox({
+        //     title: 'Error',
+        //     type: 'error',
+        //     message: 'Unable to execute script \'' + command + '\'. Error: \r\n' + error
+        // }).then((data) => {
+        //     log.debug("Clicked dialog button #" + data.response);
+        //     if (0 === data.response) {
+        //         app.quit();
+        //     }
+        // });
+    });
+
+    // fetch stdout
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (data) => {
+        // log stdout data
+        data = data.toString();
+        log.info(data);
+    });
+
+    // fetch stderr
+    child.stderr.setEncoding('utf8');
+    child.stderr.on('data', (data) => {
+        // log stderr data
+        data = data.toString();
+        log.error(data);
+
+        // TODO: show more cool-looking notifications
+        // dialog.showMessageBox({
+        //     title: 'Error',
+        //     type: 'error',
+        //     message: 'Unable to execute script:\r\n \'' + command + ' ' + args + '\'. \r\nError: \r\n' + data
+        // }).then((data) => {
+        //     log.debug("Clicked dialog button #" + data.response);
+        //     if (0 === data.response) {
+        //         app.quit();
+        //     }
+        // });
+    });
+
+    child.on('close', (code) => {
+        switch (code) {
+            case 0:
+                {
+                    log.info('Successfully executed script: ' + command + ' ' + args);
+
+                    // run success callback function
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+
+                    break;
+                }
+        }
+    });
+
+    return child;
 }
 
 function localFileExists(path) {
@@ -322,135 +312,26 @@ function localFileExists(path) {
     }
 }
 
+// cross-platform setup procedures
+function setupElrsLocally() {
+    // start event with running spinner loader
+    setupUpdateWindow.webContents.send('elrs-setup-started');
 
+    log.info("Setting up ExpressLRS Configurator locally");
 
-
-const winDirPythonEmbedded = "./setup/win/python-3.8.8-embed-amd64/python.exe";
-
-function cloneExpressLRS() {
-
-    // TODO: check if we already have git installed
-    log.info("Checking for already cloned ExpressLRS project");
-
-    if (!localFileExists(localElrsDir)) {
-
-        log.info("Local ExpressLRS repository not found! Starting cloning...");
-
-        // install Portable Git
-        runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -c\"\""], pullExpressLRS);
-    } else {
-        log.info("Found local ExpressLRS repository");
-        pullExpressLRS();
-    }
-}
-
-function pullExpressLRS() {
-
-    // TODO: check if we already have git installed
-    log.info("Updating local ExpressLRS project");
-
-    runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -p\"\""], autoPullElrsGithubRepo);
-}
-
-
-
-
-
-let installGitProcess = null
-
-function extractWinGit() {
-
-    // TODO: check if we already have git installed. Currently using Portable git version.
-
-    log.info("Checking for local Portable Git installation");
-
-    const winDirPortableGit = ".\\setup\\win\\PortableGit-2.30.1-64-bit\\git-bash.exe";
-    if (!localFileExists(winDirPortableGit)) {
-
-        log.info("Local Portable Git not found! Starting installation...");
-
-        // install Portable Git
-        installGitProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/PortableGit-2.30.1-64-bit.7z.exe\" -o./setup/win/PortableGit-2.30.1-64-bit -aos\"\""], cloneExpressLRS);
-    } else {
-        log.info("Found local Portable Git installation");
-        cloneExpressLRS();
-    }
-}
-
-function installLinuxGit() {}
-
-function installMacGit() {}
-
-// cross-platform Git install procedures
-function installGit() {
     byOS({
-        [platforms.WINDOWS]: extractWinGit(),
-        [platforms.LINUX]: installLinuxGit(),
-        [platforms.MAC]: installMacGit(),
-    });
-}
-
-let installPythonToolsProcess = null;
-
-function installWinPythonTools() {
-    log.info("Installing Python tools needed for ExpressLRS");
-
-    // install Python tools for ExpressLRS
-    installPythonToolsProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/setup.py\" -s\"\""], installGit);
-}
-
-function installLinuxPythonTools() {}
-
-function installMacPythonTools() {}
-
-// cross-platform ExpressLRS Python tools install procedures - should be called once after Python installation
-function installPythonTools() {
-    byOS({
-        [platforms.WINDOWS]: installWinPythonTools(),
-        [platforms.LINUX]: installLinuxPythonTools(),
-        [platforms.MAC]: installMacPythonTools(),
-    });
-}
-
-let installPythonProcess = null;
-
-function extractWinPython() {
-    log.info("Checking for local Python embedded installation");
-
-    if (!localFileExists(winDirPythonEmbedded)) {
-
-        log.info("Local Python embedded not found! Starting installation...");
-
-        // install Python embedded
-        installPythonProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/python-3.8.8-embed-amd64.7z\" -o./setup/win -aos\"\""], installPythonTools);
-    } else {
-        log.info("Found local Python embedded installation");
-        installGit();
-    }
-}
-
-function installLinuxPython() {}
-
-function installMacPython() {}
-
-// cross-platform Python install procedures
-function installPython() {
-    byOS({
-        [platforms.WINDOWS]: extractWinPython(),
-        [platforms.LINUX]: installLinuxPython(),
-        [platforms.MAC]: installMacPython(),
+        [platforms.WINDOWS]: setupWinElrsLocally(),
+        [platforms.LINUX]: setupLinuxElrsLocally(),
+        [platforms.MAC]: setupMacElrsLocally(),
     });
 }
 
 let setupElrsProcess = null
 
 function setupWinElrsLocally() {
-
     log.info("Checking for local 7-Zip installation");
 
-    const winDir7zip = "C:/Program Files/7-Zip/7z.exe";
     if (!localFileExists(winDir7zip)) {
-
         log.info("Local 7-Zip installation not found! Starting installation...")
 
         // install 7-Zip archiver
@@ -464,83 +345,162 @@ function setupWinElrsLocally() {
 function setupLinuxElrsLocally() {}
 
 function setupMacElrsLocally() {}
+// end of cross-platform setup procedures
 
-// cross-platform setup procedures
-function setupElrsLocally() {
+// cross-platform Python install procedures
+function installPython() {
+    setupUpdateWindow.webContents.send('python-setup-started');
+
+    log.info("Checking for local Python embedded installation");
+
+    if (!localFileExists(winDirPythonEmbedded)) {
+
+        log.info("Local Python embedded not found! Starting installation...");
+
+        byOS({
+            [platforms.WINDOWS]: extractWinPython(),
+            [platforms.LINUX]: installLinuxPython(),
+            [platforms.MAC]: installMacPython(),
+        });
+    } else {
+        log.info("Found local Python embedded installation");
+        installGit();
+    }
+}
+
+let installPythonProcess = null;
+
+function extractWinPython() {
+    // install Python embedded
+    installPythonProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/python-3.8.8-embed-amd64.7z\" -o./setup/win -aos\"\""], installPythonTools);
+}
+
+function installLinuxPython() {}
+
+function installMacPython() {}
+// end of cross-platform Python install procedures
+
+// cross-platform ExpressLRS Python tools install procedures - should be called once after Python installation
+function installPythonTools() {
+    setupUpdateWindow.webContents.send('python-tools-setup-started');
+
+    log.info("Installing Python tools needed for ExpressLRS");
+
     byOS({
-        [platforms.WINDOWS]: setupWinElrsLocally(),
-        [platforms.LINUX]: setupLinuxElrsLocally(),
-        [platforms.MAC]: setupMacElrsLocally(),
+        [platforms.WINDOWS]: installWinPythonTools(),
+        [platforms.LINUX]: installLinuxPythonTools(),
+        [platforms.MAC]: installMacPythonTools(),
     });
 }
 
+let installPythonToolsProcess = null;
+
+function installWinPythonTools() {
+    // install Python tools for ExpressLRS on Windows
+    installPythonToolsProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/setup.py\" -s\"\""], installGit);
+}
+
+function installLinuxPythonTools() {}
+
+function installMacPythonTools() {}
+// end of cross-platform ExpressLRS Python tools install procedures
+
+// cross-platform Git install procedures
+function installGit() {
+    setupUpdateWindow.webContents.send('git-setup-started');
+
+    // TODO: check if we already have git installed. Currently using Portable git version.
+    log.info("Checking for local Portable Git installation");
+
+    if (!localFileExists(winDirPortableGit)) {
+        log.info("Local Portable Git not found! Starting installation...");
+
+        byOS({
+            [platforms.WINDOWS]: extractWinGit(),
+            [platforms.LINUX]: installLinuxGit(),
+            [platforms.MAC]: installMacGit(),
+        });
+    } else {
+        log.info("Found local Portable Git installation");
+        cloneExpressLRS();
+    }
+}
+
+let installGitProcess = null
+
+function extractWinGit() {
+    // install Portable Git
+    installGitProcess = runScript("cmd", ["/C \"\"C:/Program Files/7-zip/7z.exe\" x \"./setup/win/PortableGit-2.30.1-64-bit.7z.exe\" -o./setup/win/PortableGit-2.30.1-64-bit -aos\"\""], cloneExpressLRS);
+}
+
+function installLinuxGit() {}
+
+function installMacGit() {}
+// end of cross-platform Git install procedures
+
+// cross-platform ExpressLRS clone procedures
+function cloneExpressLRS() {
+    setupUpdateWindow.webContents.send('initial-elrs-clone');
+
+    log.info("Checking for already cloned ExpressLRS project");
+
+    if (!localFileExists(localElrsDir)) {
+        log.info("Local ExpressLRS repository not found! Starting cloning ExpressLRS...");
+
+        byOS({
+            [platforms.WINDOWS]: cloneWinExpressLRS(),
+            [platforms.LINUX]: cloneLinuxExpressLRS(),
+            [platforms.MAC]: cloneMacExpressLRS(),
+        });
+    } else {
+        log.info("Found local ExpressLRS repository");
+        pullExpressLRS();
+    }
+}
+
+let cloneExpressLRSProcess = null
+
+function cloneWinExpressLRS() {
+    // clone ExpressLRS using embedded Python on Windows
+    cloneExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -c\"\""], pullExpressLRS);
+}
+
+function cloneLinuxExpressLRS() {}
+
+function cloneMacExpressLRS() {}
+// cross-platform ExpressLRS clone procedures
+
+// cross-platform ExpressLRS pull procedures
+function pullExpressLRS() {
+    setupUpdateWindow.webContents.send('initial-elrs-pull');
+
+    log.info("Updating local ExpressLRS project with latest current branch changes");
+
+    byOS({
+        [platforms.WINDOWS]: pullWinExpressLRS(),
+        [platforms.LINUX]: pullLinuxExpressLRS(),
+        [platforms.MAC]: pullMacExpressLRS(),
+    });
+}
+
+let pullExpressLRSProcess = null
+
+function pullWinExpressLRS() {
+    // pull ExpressLRS using embedded Python on Windows
+    pullExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -p\"\""], autoPullElrsGithubRepo);
+}
+
+function pullLinuxExpressLRS() {}
+
+function pullMacExpressLRS() {}
+// cross-platform ExpressLRS pull procedures
 
 
 
-// let activatePythonVenvProcess = null
-// const activateElrsPythonVenv = () => {
 
-//     activatePythonVenvProcess = spawn('py', ['-3', srcDir + 'elrs-cli/setup.py', '-a']);
 
-//     if (activatePythonVenvProcess != null) {
-//         log.info('Activating ExpressLRS Python venv locally');
 
-//         activatePythonVenvProcess.stdout.on('data', function(data) {
-//             log.info(data.toString());
-//         });
-
-//         activatePythonVenvProcess.on('exit', (code) => {
-//             if (Number(0) === Number(code)) {
-//                 log.info('Successfully activated ExpressLRS Python venv locally. Exit code: %s', code);
-
-//                 // check and update local ExpressLRS repository if needed
-//                 if (needElrsGithubRepoClone()) {
-//                     // clone ExpressLRS at startup if starting for first time - THIS TAKES A WHILE... BE PATIENT!
-//                     autoCloneElrsGithubRepo();
-//                 } else {
-//                     // just update local ExpressLRS repository with latest changes from master
-//                     autoPullElrsGithubRepo();
-//                 }
-//             } else {
-//                 log.error('Failed activating ExpressLRS Python venv locally. Exit code: %s', code);
-
-//                 // quit application if error while activating venv
-//                 app.quit();
-//             }
-//         });
-//     }
-// }
-
-// let autoCloneElrsProcess = null
-// const autoCloneElrsGithubRepo = () => {
-
-//     // execute child process
-//     autoCloneElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-c']);
-
-//     if (autoCloneElrsProcess != null) {
-//         log.info('Cloning ExpressLRS locally');
-
-//         autoCloneElrsProcess.stdout.on('data', function(data) {
-//             log.info(data.toString());
-//         });
-
-//         autoCloneElrsProcess.on('exit', (code) => {
-//             if (Number(0) === Number(code)) {
-//                 log.info('Cloning ExpressLRS locally finished successfully. Exit code: %s', code);
-
-//                 // update local ExpressLRS repository with latest changes from master after cloning master code locally
-//                 autoPullElrsGithubRepo();
-//             } else {
-//                 log.error('Failed cloning ExpressLRS locally. Exit code: %s', code);
-
-//                 // TODO: show popup window marking an error while cloning ExpressLRS locally instead quiting directly
-//                 app.quit();
-//             }
-//         });
-//     }
-// }
-
-// Manual cloning from menu
+// manual cloning from menu
 let cloneElrsProcess = null
 const cloneElrsGithubRepo = () => {
     // start event with running spinner loader
@@ -818,17 +778,29 @@ const killAllProcesses = () => {
         log.debug("\'installPythonProcess\' successfully killed!")
     }
 
+    if (null != installPythonToolsProcess) {
+        installPythonToolsProcess.kill();
+        installPythonToolsProcess = null;
+        log.debug("\'installPythonToolsProcess\' successfully killed!")
+    }
+
     if (null != installGitProcess) {
         installGitProcess.kill();
         installGitProcess = null;
         log.debug("\'installGitProcess\' successfully killed!")
     }
 
-    // cloneElrsProcess.kill();
-    // cloneElrsProcess = null;
+    if (null != cloneExpressLRSProcess) {
+        cloneExpressLRSProcess.kill();
+        cloneExpressLRSProcess = null;
+        log.debug("\'cloneExpressLRSProcess\' successfully killed!")
+    }
 
-    // pullElrsProcess.kill();
-    // pullElrsProcess = null;
+    if (null != pullExpressLRSProcess) {
+        pullExpressLRSProcess.kill();
+        pullExpressLRSProcess = null;
+        log.debug("\'pullExpressLRSProcess\' successfully killed!")
+    }
 
     // listElrsBranchesProcess.kill();
     // listElrsBranchesProcess = null;

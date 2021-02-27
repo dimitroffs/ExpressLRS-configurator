@@ -83,7 +83,7 @@ def setupPythonTools():
 
     # install PlatformIO
     logger.debug("Installing PlatformIO")
-    subprocess.check_call([sys.executable, getPipPath], shell=True)
+    subprocess.check_call([sys.executable, getPlatformIOPath], shell=True)
 
     logger.debug("Finished setup Python tools needed for ExpressLRS CLI")
 
