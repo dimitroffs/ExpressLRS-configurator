@@ -64,7 +64,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--clone", action="store_true", help="clone ExpressLRS GitHub repository locally")
 parser.add_argument("-p", "--pull", action="store_true",
                     help="pull latest changes locally from ExpressLRS GitHub repository master branch")
-parser.add_argument("-l", "--list", action="store_true", help="list ExpressLRS GitHub repository branches")
 parser.add_argument("-r", "--reset", type=str, help="reset ExpressLRS to specific branch")
 parser.add_argument("-t", "--target", type=str, help="specify ExpressLRS build/upload target for PlatformIO")
 parser.add_argument("-b", "--build", action="store_true", help="build ExpressLRS firmware for specified target")
@@ -106,31 +105,17 @@ def pullElrsGithubRepo():
     logger.debug("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
-# Helper function to get all ExpressLRS remote branches from GitHub repository
-# def fetchElrsGithubRepoBranches():
-#     try:
-#         logger.info("Fetching latest ExpressLRS branches from GitHub repository")
-#         localRepo = git.cmd.Git(PROJECT_DIR + '/ExpressLRS')
-#         localRepo.fetch('--all')
-#         allRemoteBranches = localRepo.branch('-r').split('\n')
-#         allRemoteBranchesNames = [b.strip() for b in allRemoteBranches]
-#         logger.info(f"Successfully fetched total {len(allRemoteBranchesNames)} ExpressLRS branches from GitHub repository")
+# Reset current ExpressLRS local repository to specific branch
+def resetElrsLocalRepositoryToBranch(branch):
+    logger.info(f"Resetting ExpressLRS local repository to remote '{branch}' branch")
 
-#         # HEAD is not needed in this list
-#         remoteBranchesNames = [ b for b in allRemoteBranchesNames if not 'origin/HEAD' in b]
-#         logger.info(f"Only {len(remoteBranchesNames)} ExpressLRS branches useful from origin")
+    os.chdir(ELRS_REPO_DIR)
 
-#         return remoteBranchesNames
-#     except Exception as e:
-#         logger.error("Unable to fetch ExpressLRS GirHub repository branches")
-#         return []
+    subprocess.check_call(['git', '--version'])
+    subprocess.check_call(['git', 'reset', '--hard', branch])
 
-
-# # Reset current ExpressLRS local repository to specific branch
-# def resetElrsLocalRepositoryToBranch(branch):
-#     logger.info(f"Resetting ExpressLRS local repository to remote '{branch}' branch")
-#     logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').reset('--hard', branch))
-#     logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
+    # logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').reset('--hard', branch))
+    logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
 
 
 # ExpressLRS PlatformIO build target function
@@ -164,10 +149,6 @@ if args.clone:
 
 if args.pull:
     pullElrsGithubRepo()
-    exit(0)
-
-if args.list:
-    # print(fetchElrsGithubRepoBranches())
     exit(0)
 
 if args.reset:

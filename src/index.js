@@ -487,68 +487,15 @@ let pullExpressLRSProcess = null
 
 function pullWinExpressLRS() {
     // pull ExpressLRS using embedded Python on Windows
-    pullExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -p\"\""], autoPullElrsGithubRepo);
+    pullExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -p\"\""], startElrsConfigurator);
 }
 
 function pullLinuxExpressLRS() {}
 
 function pullMacExpressLRS() {}
-// cross-platform ExpressLRS pull procedures
+// end of cross-platform ExpressLRS pull procedures
 
-
-
-
-
-
-// manual cloning from menu
-let cloneElrsProcess = null
-const cloneElrsGithubRepo = () => {
-    // start event with running spinner loader
-    mainWindow.webContents.send('elrs-clone-started');
-
-    // execute child process
-    cloneElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-c']);
-
-    if (cloneElrsProcess != null) {
-        log.info('Cloning ExpressLRS locally');
-
-        cloneElrsProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
-        });
-
-        cloneElrsProcess.on('exit', (code) => {
-            if (Number(0) === Number(code)) {
-                log.info('Cloning ExpressLRS locally finished successfully. Exit code: %s', code);
-
-                // update local ExpressLRS repository with latest changes from master after cloning master code locally
-                pullElrsGithubRepo();
-            } else {
-                log.error('Failed cloning ExpressLRS locally. Exit code: %s', code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-clone-failed')
-            }
-        });
-    }
-}
-
-let autoPullElrsProcess = null
-const autoPullElrsGithubRepo = () => {
-
-    // autoPullElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-p']);
-
-    // if (autoPullElrsProcess != null) {
-    //     log.info('Updating ExpressLRS locally.');
-
-    //     autoPullElrsProcess.stdout.on('data', function(data) {
-    //         log.info(data.toString());
-    //     });
-
-    //     autoPullElrsProcess.on('exit', (code) => {
-    //         if (Number(0) === Number(code)) {
-    let code = 3;
-    log.info('Successfully updated ExpressLRS locally. Exit code: %s', code);
-
+function startElrsConfigurator() {
     // show main window
     mainWindow.show();
 
@@ -557,83 +504,51 @@ const autoPullElrsGithubRepo = () => {
 
     // fetch latest ExpressLRS branches
     listElrsBranches();
-
-    // send event for success pull
-    mainWindow.webContents.send('elrs-pull-success')
-        //         } else {
-        //             log.error('Failed updating ExpressLRS locally. Exit code: %s', code);
-
-    //             // TODO: show popup window marking an error while pulling latest ExpressLRS repository changes locally instead quiting directly
-    //             app.quit();
-    //         }
-    //     });
-    // }
 }
 
-let pullElrsProcess = null
-const pullElrsGithubRepo = () => {
-    // start event with running spinner loader
-    mainWindow.webContents.send('elrs-pull-started');
+// fetch latest locally updated remotes from .git/packet-refs file
+function listElrsBranches() {
+    let fetchedElrsRemotes = [];
 
-    pullElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-p']);
+    const readInterface = readline.createInterface({
+        input: fs.createReadStream(srcDir + "ExpressLRS/.git/packed-refs"),
+        output: process.stdout,
+        console: false
+    });
 
-    if (pullElrsProcess != null) {
-        log.info('Updating ExpressLRS locally.');
+    readInterface.on('line', function(line) {
+        if (!line.startsWith('#')) {
+            // split by space
+            lineSplit = line.split(' ');
 
-        pullElrsProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
-        });
+            // second element contains full remote path
+            fullRemotePath = lineSplit[1];
 
-        pullElrsProcess.on('exit', (code) => {
-            if (Number(0) === Number(code)) {
-                log.info('Successfully updated ExpressLRS locally. Exit code: %s', code);
-
-                // send event for success pull
-                mainWindow.webContents.send('elrs-pull-success')
-            } else {
-                log.error('Failed updating ExpressLRS locally. Exit code: %s', code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-pull-failed')
+            remoteName = null
+            if (fullRemotePath.includes('/remotes/')) {
+                // remove 'refs/remotes/' from full remote path
+                remoteName = fullRemotePath.substring(13)
             }
-        });
-    }
-}
 
-let listElrsBranchesProcess = null;
-let fetchedRemoteBranches = null;
-const listElrsBranches = () => {
-    // start event with running spinner loader
-    mainWindow.webContents.send('update-elrs-branches-started');
-
-    // execute child process
-    listElrsBranchesProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-l']);
-
-    if (listElrsBranchesProcess != null) {
-        log.info('Fetching ExpressLRS remote branches locally');
-
-        listElrsBranchesProcess.stdout.on('data', function(data) {
-            fetchedRemoteBranches = '' + data.toString();
-            log.info("Fetched ExpressLRS remoted branches: " + data.toString());
-        });
-
-        listElrsBranchesProcess.on('exit', (code) => {
-            if (Number(0) === Number(code)) {
-                log.info('Successfully fetched ExpressLRS remote branches locally. Exit code: %s', code);
-
-                // update local ExpressLRS branches select component, keeping remote branches for select
-                mainWindow.webContents.send('update-elrs-branches-success', fetchedRemoteBranches);
-
-                // fetch latest PlatformIO build targets
-                updateElrsBuildTargets();
-            } else {
-                log.error('Failed fetching ExpressLRS remote branches locally. Exit code: %s', code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('update-elrs-branches-failed')
+            if (fullRemotePath.includes('/tags/')) {
+                // remove 'refs/tags/' from full remote path
+                remoteName = fullRemotePath.substring(10)
             }
-        });
-    }
+
+            // add to array list
+            fetchedElrsRemotes.push(remoteName);
+        }
+    });
+
+    readInterface.on('close', function(line) {
+        log.info('Successfully fetched ExpressLRS remote branches: %s', fetchedElrsRemotes);
+
+        // update local ExpressLRS branches select component, keeping remote branches for select
+        mainWindow.webContents.send('update-elrs-branches-success', fetchedElrsRemotes);
+
+        // fetch latest PlatformIO build targets
+        updateElrsBuildTargets();
+    });
 }
 
 // fetch latest PlatformIO build targets from platformio.ini
@@ -664,6 +579,110 @@ function updateElrsBuildTargets() {
         mainWindow.webContents.send('update-elrs-build-targets-success', fetchedPioBuildTargets);
     });
 }
+
+
+
+
+
+// // manual cloning from menu
+// let cloneElrsProcess = null
+// const cloneElrsGithubRepo = () => {
+//     // start event with running spinner loader
+//     mainWindow.webContents.send('elrs-clone-started');
+
+//     // execute child process
+//     cloneElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-c']);
+
+//     if (cloneElrsProcess != null) {
+//         log.info('Cloning ExpressLRS locally');
+
+//         cloneElrsProcess.stdout.on('data', function(data) {
+//             log.info(data.toString());
+//         });
+
+//         cloneElrsProcess.on('exit', (code) => {
+//             if (Number(0) === Number(code)) {
+//                 log.info('Cloning ExpressLRS locally finished successfully. Exit code: %s', code);
+
+//                 // update local ExpressLRS repository with latest changes from master after cloning master code locally
+//                 pullElrsGithubRepo();
+//             } else {
+//                 log.error('Failed cloning ExpressLRS locally. Exit code: %s', code);
+
+//                 // send success event for stopping spinner loader
+//                 mainWindow.webContents.send('elrs-clone-failed')
+//             }
+//         });
+//     }
+// }
+
+// let pullElrsProcess = null
+// const pullElrsGithubRepo = () => {
+//     // start event with running spinner loader
+//     mainWindow.webContents.send('elrs-pull-started');
+
+//     pullElrsProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-p']);
+
+//     if (pullElrsProcess != null) {
+//         log.info('Updating ExpressLRS locally.');
+
+//         pullElrsProcess.stdout.on('data', function(data) {
+//             log.info(data.toString());
+//         });
+
+//         pullElrsProcess.on('exit', (code) => {
+//             if (Number(0) === Number(code)) {
+//                 log.info('Successfully updated ExpressLRS locally. Exit code: %s', code);
+
+//                 // send event for success pull
+//                 mainWindow.webContents.send('elrs-pull-success')
+//             } else {
+//                 log.error('Failed updating ExpressLRS locally. Exit code: %s', code);
+
+//                 // send success event for stopping spinner loader
+//                 mainWindow.webContents.send('elrs-pull-failed')
+//             }
+//         });
+//     }
+// }
+
+// let listElrsBranchesProcess = null;
+// let fetchedRemoteBranches = null;
+// const listElrsBranches = () => {
+//     // start event with running spinner loader
+//     mainWindow.webContents.send('update-elrs-branches-started');
+
+//     // execute child process
+//     listElrsBranchesProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-l']);
+
+//     if (listElrsBranchesProcess != null) {
+//         log.info('Fetching ExpressLRS remote branches locally');
+
+//         listElrsBranchesProcess.stdout.on('data', function(data) {
+//             fetchedRemoteBranches = '' + data.toString();
+//             log.info("Fetched ExpressLRS remoted branches: " + data.toString());
+//         });
+
+//         listElrsBranchesProcess.on('exit', (code) => {
+//             if (Number(0) === Number(code)) {
+//                 log.info('Successfully fetched ExpressLRS remote branches locally. Exit code: %s', code);
+
+//                 // update local ExpressLRS branches select component, keeping remote branches for select
+//                 mainWindow.webContents.send('update-elrs-branches-success', fetchedRemoteBranches);
+
+//                 // fetch latest PlatformIO build targets
+//                 updateElrsBuildTargets();
+//             } else {
+//                 log.error('Failed fetching ExpressLRS remote branches locally. Exit code: %s', code);
+
+//                 // send success event for stopping spinner loader
+//                 mainWindow.webContents.send('update-elrs-branches-failed')
+//             }
+//         });
+//     }
+// }
+
+
 
 let resetElrsBranchProcess = null
 const resetElrsBranch = (branch) => {

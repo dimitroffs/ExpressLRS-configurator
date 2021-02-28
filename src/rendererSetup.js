@@ -21,7 +21,7 @@ ipcRenderer.on('python-tools-setup-started', () => {
 });
 
 ipcRenderer.on('git-setup-started', () => {
-    setSetupStatusMsg("Setting up git locally")
+    setSetupStatusMsg("Setting up git client locally")
 });
 
 ipcRenderer.on('initial-elrs-clone', () => {

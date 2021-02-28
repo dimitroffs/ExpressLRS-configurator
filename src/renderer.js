@@ -353,15 +353,8 @@ function errorElrsStatusMsg(msg) {
 function updateElrsRemoteBranches(fetchedRemoteBranches) {
     var fragment = document.createDocumentFragment();
 
-    // trim branches string
-    fetchedRemoteBranches = fetchedRemoteBranches.trim();
-
-    // remove start/end brackets for better split
-    var substringEnd = fetchedRemoteBranches.length - 2;
-    fetchedRemoteBranches = fetchedRemoteBranches.substring(2, substringEnd);
-
-    // split remote branches and apply to branches select component
-    fetchedRemoteBranches.split("\', \'").forEach(function(branchName, index) {
+    // apply to branches select component
+    fetchedRemoteBranches.forEach(function(branchName, index) {
         var opt = document.createElement('option');
         opt.innerHTML = branchName;
         opt.value = branchName;
@@ -376,7 +369,7 @@ function updateElrsRemoteBranches(fetchedRemoteBranches) {
 function updateElrsBuildTargets(fetchedPioBuildTargets) {
     var fragment = document.createDocumentFragment();
 
-    // split remote branches and apply to branches select component
+    // apply to targets select component
     fetchedPioBuildTargets.forEach(function(buildTarget, index) {
         var opt = document.createElement('option');
         opt.innerHTML = buildTarget;
