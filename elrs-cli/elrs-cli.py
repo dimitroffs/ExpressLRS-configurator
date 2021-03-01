@@ -25,6 +25,7 @@ import logging
 import os
 import subprocess
 import sys
+import pathlib
 
 scriptpath = os.path.realpath(__file__)
 
@@ -32,20 +33,15 @@ scriptpath = os.path.realpath(__file__)
 PROJECT_DIR = scriptpath[0:-len("/elrs-cli/elrs-cli.py")]
 ELRS_REPO_DIR = os.path.join(PROJECT_DIR, 'ExpressLRS')
 
-GIT_EXEC_DIR = os.path.join(PROJECT_DIR, "setup", "win", "PortableGit-2.30.1-64-bit", "cmd")
-# Make sure it's at the beginning of the PATH
-os.environ["PATH"] = os.pathsep.join([GIT_EXEC_DIR]) + os.pathsep + os.environ["PATH"]
-# NOW import it
+# TODO: windows only paths
+GIT_EXEC_DIR_WIN = os.path.join(PROJECT_DIR, "setup", "win", "PortableGit-2.30.1-64-bit", "cmd")
+PIO_EXEC_DIR_WIN = os.path.join(str(pathlib.Path.home()), ".platformio", "penv", "Scripts")
 
-# import git
-
-# gitVersion = git.cmd.Git(PROJECT_DIR + '/ExpressLRS').version_info
-
-# from yaspin import yaspin
+# Make sure environmental variables are put in the beginning of the PATH
+os.environ["PATH"] = os.pathsep.join([GIT_EXEC_DIR_WIN]) + os.pathsep + os.environ["PATH"]
+os.environ["PATH"] = os.pathsep.join([PIO_EXEC_DIR_WIN]) + os.pathsep + os.environ["PATH"]
 
 # Organize folder names
-
-
 srcdir = os.path.join(PROJECT_DIR, "ExpressLRS", "src")
 
 # Logger config
@@ -71,9 +67,7 @@ parser.add_argument("-u", "--upload", action="store_true", help="upload ExpressL
 args = parser.parse_args()
 
 # Github clone whole ExpressLRS repository function
-# @yaspin(text="[ExpressLRS clone] ", color="cyan")
 def cloneElrsGithubRepo():
-    # logger.debug("Using Git version: {0}".format(gitVersion))
     logger.debug("Cloning ExpressLRS GitHub repository in local directory: {PROJECT_DIR}")
 
     subprocess.check_call(['git', '--version'])
@@ -85,14 +79,11 @@ def cloneElrsGithubRepo():
     subprocess.check_call(['git', 'sparse-checkout', 'set', 'src'])
     subprocess.check_call(['git', 'config', 'pull.rebase', 'true'])
 
-    # git.cmd.Git(PROJECT_DIR).clone("https://github.com/AlessandroAU/ExpressLRS.git")
     logger.debug("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Github pull latest ExpressLRS repository master branch function
-# @yaspin(text="[ExpressLRS pull] ", color="cyan")
 def pullElrsGithubRepo():
-    # logger.debug("Using Git version: {0}".format(gitVersion))
     logger.debug("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
     
     os.chdir(ELRS_REPO_DIR)
@@ -100,8 +91,6 @@ def pullElrsGithubRepo():
     subprocess.check_call(['git', '--version'])
     subprocess.check_call(['git', 'pull'])
 
-    # logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').pull('origin', 'master'))
-    
     logger.debug("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
@@ -114,7 +103,6 @@ def resetElrsLocalRepositoryToBranch(branch):
     subprocess.check_call(['git', '--version'])
     subprocess.check_call(['git', 'reset', '--hard', branch])
 
-    # logger.info(git.cmd.Git(PROJECT_DIR + '/ExpressLRS').reset('--hard', branch))
     logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
 
 
@@ -125,7 +113,6 @@ def pioBuild(target):
         exit(1)
     else:
         logger.info(f"ExpressLRS CLI build target: {target}")
-        pullElrsGithubRepo()
         logger.info("Executing PlatformIO CLI 'build' from directory [{srcdir}] for ExpressLRS target [{target}] firmware")
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--environment', target])
         logger.info("Successfully executed PlatformIO CLI 'build' for ExpressLRS target [{target}] firmware")
@@ -135,9 +122,8 @@ def pioBuild(target):
 def pioUpload(target):
     if target is None:
         logger.info("ExpressLRS CLI '-u (upload)' needs '-t (target)' parameter")
-        exit(1)
+        sys.exit(1)
     else:
-        pullElrsGithubRepo()
         logger.info("Executing PlatformIO CLI 'upload' from directory [{srcdir}] for ExpressLRS target [{target}] firmware")
         subprocess.check_call(['pio', 'run', '--project-dir', srcdir, '--target', 'upload', '--environment', target])
         logger.info("Successfully executed PlatformIO CLI 'upload' for ExpressLRS target [{target}] firmware")
@@ -145,24 +131,24 @@ def pioUpload(target):
 
 if args.clone:
     cloneElrsGithubRepo()
-    exit(0)
+    sys.exit(0)
 
 if args.pull:
     pullElrsGithubRepo()
-    exit(0)
+    sys.exit(0)
 
 if args.reset:
     branch = args.reset
-    # resetElrsLocalRepositoryToBranch(branch)
-    exit(0)
+    resetElrsLocalRepositoryToBranch(branch)
+    sys.exit(0)
 
 # fetch build/upload target from CLI args
 target = args.target
 
 if args.build:
     pioBuild(target)
-    exit(0)
+    sys.exit(0)
 
 if args.upload:
     pioUpload(target)
-    exit(0)
+    sys.exit(0)

@@ -229,7 +229,7 @@ ipcMain.handle('update-elrs-branches-clicked', () => {
 });
 
 // helper function to run script in terminal
-function runScript(command, args, callback) {
+function runScript(command, args, callback, errCallback) {
     log.info('Executing script: ' + command + ' ' + args);
 
     // spawn os subprocess
@@ -272,7 +272,7 @@ function runScript(command, args, callback) {
         data = data.toString();
         log.error(data);
 
-        // TODO: show more cool-looking notifications
+        // TODO: show more cool - looking notifications
         // dialog.showMessageBox({
         //     title: 'Error',
         //     type: 'error',
@@ -297,6 +297,13 @@ function runScript(command, args, callback) {
                     }
 
                     break;
+                }
+            default:
+                {
+                    // run error callback function
+                    if (typeof errCallback === 'function') {
+                        errCallback();
+                    }
                 }
         }
     });
@@ -454,7 +461,7 @@ function cloneExpressLRS() {
         });
     } else {
         log.info("Found local ExpressLRS repository");
-        pullExpressLRS();
+        startElrsConfigurator();
     }
 }
 
@@ -580,6 +587,118 @@ function updateElrsBuildTargets() {
     });
 }
 
+// cross-platform reset ExpressLRS to branch procedures
+function resetElrsBranch(branch) {
+    mainWindow.webContents.send('elrs-reset-branch-started')
+
+    log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', branch);
+
+    byOS({
+        [platforms.WINDOWS]: resetWinElrsBranch(branch),
+        [platforms.LINUX]: resetLinuxElrsBranch(branch),
+        [platforms.MAC]: resetMacElrsBranch(branch),
+    });
+}
+
+let resetElrsBranchProcess = null
+let resetBranch = null;
+
+function resetWinElrsBranch(branch) {
+    // reset ExpressLRS code source using embedded Python on Windows
+    resetElrsBranchProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -r \"" + branch + "\"\""], resetElrsBranchSuccess, resetElrsBranchFailed);
+    resetBranch = branch;
+}
+
+function resetLinuxElrsBranch(branch) {}
+
+function resetMacElrsBranch(branch) {}
+// end of cross-platform reset ExpressLRS to branch procedures
+
+function resetElrsBranchSuccess() {
+    log.info('Resetting ExpressLRS local repository to branch \'%s\' completed successfully', resetBranch);
+
+    // send event for successfully finished target build
+    mainWindow.webContents.send('elrs-reset-branch-success')
+}
+
+function resetElrsBranchFailed() {
+    log.error('Failed resetting ExpressLRS local repository to remote branch %s', resetBranch);
+
+    // send failed event for stopping spinner loader
+    mainWindow.webContents.send('elrs-reset-branch-failed')
+}
+
+// cross-platform build ExpressLRS firmware procedures
+function buildElrsFirmwareForTarget(target) {
+    log.info('Building ExpressLRS firmware for target: %s', target);
+
+    byOS({
+        [platforms.WINDOWS]: buildWinElrsFirmwareForTarget(target),
+        [platforms.LINUX]: buildLinuxElrsFirmwareForTarget(target),
+        [platforms.MAC]: buildMacElrsFirmwareForTarget(target),
+    });
+}
+
+let buildElrsFirmwareProcess = null
+let buildTarget = null;
+
+function buildWinElrsFirmwareForTarget(target) {
+    // build ExpressLRS firmware for specific target using embedded Python on Windows
+    buildElrsFirmwareProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -b -t \"" + target + "\"\""], buildElrsFirmwareForTargetSuccess, buildElrsFirmwareForTargetFailed);
+    buildTarget = target;
+}
+
+function buildLinuxElrsFirmwareForTarget(branch) {}
+
+function buildMacElrsFirmwareForTarget(branch) {}
+// end of cross-platform build ExpressLRS firmware procedures
+
+function buildElrsFirmwareForTargetSuccess() {
+    log.info('Building ExpressLRS firmware for target %s completed successfully', buildTarget);
+
+    // send event for successfully finished target build
+    mainWindow.webContents.send('elrs-build-success', buildTarget)
+}
+
+function buildElrsFirmwareForTargetFailed() {
+    log.error('Failed building ExpressLRS firmware for target %s.', buildTarget);
+
+    // send failed event for stopping spinner loader
+    mainWindow.webContents.send('elrs-build-failed', buildTarget)
+}
+
+
+
+// const buildElrsFirmwareForTarget = (target) => {
+//     buildElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-b', '-t', target]);
+
+//     if (buildElrsFirmwareProcess != null) {
+//         log.info('Building ExpressLRS firmware for target: %s', target);
+
+//         buildElrsFirmwareProcess.stdout.on('data', function(data) {
+//             log.info(data.toString());
+//         });
+
+//         buildElrsFirmwareProcess.stderr.on('data', function(data) {
+//             log.error(data.toString());
+//         });
+
+//         buildElrsFirmwareProcess.on('exit', (code) => {
+//             // if execute code successful - send event for successful build done
+//             if (Number(0) === Number(code)) {
+//                 log.info('Building ExpressLRS firmware for target %s completed successfully. Exit code: %s', target, code);
+
+//                 // send event for successfully finished target build
+//                 mainWindow.webContents.send('elrs-build-success', target)
+//             } else {
+//                 log.error('Failed building ExpressLRS firmware for target %s. Exit code: %s', target, code);
+
+//                 // send success event for stopping spinner loader
+//                 mainWindow.webContents.send('elrs-build-failed', target)
+//             }
+//         });
+//     }
+// }
 
 
 
@@ -684,71 +803,9 @@ function updateElrsBuildTargets() {
 
 
 
-let resetElrsBranchProcess = null
-const resetElrsBranch = (branch) => {
-    mainWindow.webContents.send('elrs-reset-branch-started')
 
-    resetElrsBranchProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-r', branch]);
 
-    if (resetElrsBranchProcess != null) {
-        log.info('Resetting ExpressLRS local repository to remote branch: \'%s\'', branch);
 
-        resetElrsBranchProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
-        });
-
-        resetElrsBranchProcess.stderr.on('data', function(data) {
-            log.error(data.toString());
-        });
-
-        resetElrsBranchProcess.on('exit', (code) => {
-            // if execute code successful - send event for successful build done
-            if (Number(0) === Number(code)) {
-                log.info('Resetting ExpressLRS local repository to remote branch \'%s\' completed successfully. Exit code: %s', branch, code);
-
-                // send event for successfully finished target build
-                mainWindow.webContents.send('elrs-reset-branch-success')
-            } else {
-                log.error('Failed resetting ExpressLRS local repository to remote branch %s. Exit code: %s', branch, code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-reset-branch-failed')
-            }
-        });
-    }
-}
-
-let buildElrsFirmwareProcess = null
-const buildElrsFirmwareForTarget = (target) => {
-    buildElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-b', '-t', target]);
-
-    if (buildElrsFirmwareProcess != null) {
-        log.info('Building ExpressLRS firmware for target: %s', target);
-
-        buildElrsFirmwareProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
-        });
-
-        buildElrsFirmwareProcess.stderr.on('data', function(data) {
-            log.error(data.toString());
-        });
-
-        buildElrsFirmwareProcess.on('exit', (code) => {
-            // if execute code successful - send event for successful build done
-            if (Number(0) === Number(code)) {
-                log.info('Building ExpressLRS firmware for target %s completed successfully. Exit code: %s', target, code);
-
-                // send event for successfully finished target build
-                mainWindow.webContents.send('elrs-build-success', target)
-            } else {
-                log.error('Failed building ExpressLRS firmware for target %s. Exit code: %s', target, code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-build-failed', target)
-            }
-        });
-    }
-}
 
 let uploadElrsFirmwareProcess = null
 const uploadElrsFirmwareForTarget = (target) => {
@@ -821,11 +878,17 @@ const killAllProcesses = () => {
         log.debug("\'pullExpressLRSProcess\' successfully killed!")
     }
 
-    // listElrsBranchesProcess.kill();
-    // listElrsBranchesProcess = null;
+    if (null != resetElrsBranchProcess) {
+        resetElrsBranchProcess.kill();
+        resetElrsBranchProcess = null;
+        log.debug("\'resetElrsBranchProcess\' successfully killed!")
+    }
 
-    // buildElrsFirmwareProcess.kill();
-    // buildElrsFirmwareProcess = null;
+    if (null != buildElrsFirmwareProcess) {
+        buildElrsFirmwareProcess.kill();
+        buildElrsFirmwareProcess = null;
+        log.debug("\'buildElrsFirmwareProcess\' successfully killed!")
+    }
 
     // uploadElrsFirmwareProcess.kill();
     // uploadElrsFirmwareProcess = null;
