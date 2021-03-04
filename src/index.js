@@ -667,41 +667,44 @@ function buildElrsFirmwareForTargetFailed() {
     mainWindow.webContents.send('elrs-build-failed', buildTarget)
 }
 
+// cross-platform upload ExpressLRS firmware procedures
+function uploadElrsFirmwareForTarget(target) {
+    log.info('Started uploading ExpressLRS firmware for target: %s', target);
 
+    byOS({
+        [platforms.WINDOWS]: uploadWinElrsFirmwareForTarget(target),
+        [platforms.LINUX]: uploadLinuxElrsFirmwareForTarget(target),
+        [platforms.MAC]: uploadMacElrsFirmwareForTarget(target),
+    });
+}
 
-// const buildElrsFirmwareForTarget = (target) => {
-//     buildElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-b', '-t', target]);
+let uploadElrsFirmwareProcess = null
+let uploadTarget = null;
 
-//     if (buildElrsFirmwareProcess != null) {
-//         log.info('Building ExpressLRS firmware for target: %s', target);
+function uploadWinElrsFirmwareForTarget(target) {
+    // upload ExpressLRS firmware for specific target using embedded Python on Windows
+    uploadElrsFirmwareProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -u -t \"" + target + "\"\""], uploadElrsFirmwareForTargetSuccess, uploadElrsFirmwareForTargetFailed);
+    uploadTarget = target;
+}
 
-//         buildElrsFirmwareProcess.stdout.on('data', function(data) {
-//             log.info(data.toString());
-//         });
+function uploadLinuxElrsFirmwareForTarget(branch) {}
 
-//         buildElrsFirmwareProcess.stderr.on('data', function(data) {
-//             log.error(data.toString());
-//         });
+function uploadMacElrsFirmwareForTarget(branch) {}
+// end of cross-platform upload ExpressLRS firmware procedures
 
-//         buildElrsFirmwareProcess.on('exit', (code) => {
-//             // if execute code successful - send event for successful build done
-//             if (Number(0) === Number(code)) {
-//                 log.info('Building ExpressLRS firmware for target %s completed successfully. Exit code: %s', target, code);
+function uploadElrsFirmwareForTargetSuccess() {
+    log.info('Uploading ExpressLRS firmware for target %s completed successfully', uploadTarget);
 
-//                 // send event for successfully finished target build
-//                 mainWindow.webContents.send('elrs-build-success', target)
-//             } else {
-//                 log.error('Failed building ExpressLRS firmware for target %s. Exit code: %s', target, code);
+    // send event for successfully finished target upload
+    mainWindow.webContents.send('elrs-upload-success', uploadTarget)
+}
 
-//                 // send success event for stopping spinner loader
-//                 mainWindow.webContents.send('elrs-build-failed', target)
-//             }
-//         });
-//     }
-// }
+function uploadElrsFirmwareForTargetFailed() {
+    log.error('Failed uploading ExpressLRS firmware for target %s.', uploadTarget);
 
-
-
+    // send failed event for stopping spinner loader
+    mainWindow.webContents.send('elrs-upload-failed', uploadTarget)
+}
 
 // // manual cloning from menu
 // let cloneElrsProcess = null
@@ -765,79 +768,8 @@ function buildElrsFirmwareForTargetFailed() {
 //     }
 // }
 
-// let listElrsBranchesProcess = null;
-// let fetchedRemoteBranches = null;
-// const listElrsBranches = () => {
-//     // start event with running spinner loader
-//     mainWindow.webContents.send('update-elrs-branches-started');
-
-//     // execute child process
-//     listElrsBranchesProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-l']);
-
-//     if (listElrsBranchesProcess != null) {
-//         log.info('Fetching ExpressLRS remote branches locally');
-
-//         listElrsBranchesProcess.stdout.on('data', function(data) {
-//             fetchedRemoteBranches = '' + data.toString();
-//             log.info("Fetched ExpressLRS remoted branches: " + data.toString());
-//         });
-
-//         listElrsBranchesProcess.on('exit', (code) => {
-//             if (Number(0) === Number(code)) {
-//                 log.info('Successfully fetched ExpressLRS remote branches locally. Exit code: %s', code);
-
-//                 // update local ExpressLRS branches select component, keeping remote branches for select
-//                 mainWindow.webContents.send('update-elrs-branches-success', fetchedRemoteBranches);
-
-//                 // fetch latest PlatformIO build targets
-//                 updateElrsBuildTargets();
-//             } else {
-//                 log.error('Failed fetching ExpressLRS remote branches locally. Exit code: %s', code);
-
-//                 // send success event for stopping spinner loader
-//                 mainWindow.webContents.send('update-elrs-branches-failed')
-//             }
-//         });
-//     }
-// }
 
 
-
-
-
-
-
-let uploadElrsFirmwareProcess = null
-const uploadElrsFirmwareForTarget = (target) => {
-    uploadElrsFirmwareProcess = spawn('py', ['-3', srcDir + 'elrs-cli/elrs-cli.py', '-u', '-t', target]);
-
-    if (uploadElrsFirmwareProcess != null) {
-        log.info('Started uploading ExpressLRS firmware for target: %s', target);
-
-        uploadElrsFirmwareProcess.stdout.on('data', function(data) {
-            log.info(data.toString());
-        });
-
-        uploadElrsFirmwareProcess.stderr.on('data', function(data) {
-            log.error(data.toString());
-        });
-
-        uploadElrsFirmwareProcess.on('exit', (code) => {
-            log.info('Uploading ExpressLRS firmware for target %s has completed. Exit code: %s', target, code);
-
-            // if execute code successful - send event for successful upload done
-            if (Number(0) === Number(code)) {
-                // send event for successfully finished target upload
-                mainWindow.webContents.send('elrs-upload-success', target)
-            } else {
-                log.error('Failed uploading ExpressLRS firmware for target %s. Exit code: %s', target, code);
-
-                // send success event for stopping spinner loader
-                mainWindow.webContents.send('elrs-upload-failed', target)
-            }
-        });
-    }
-}
 
 const killAllProcesses = () => {
     log.info('Killing all ExpressLRS CLI processes');
@@ -890,8 +822,11 @@ const killAllProcesses = () => {
         log.debug("\'buildElrsFirmwareProcess\' successfully killed!")
     }
 
-    // uploadElrsFirmwareProcess.kill();
-    // uploadElrsFirmwareProcess = null;
+    if (null != uploadElrsFirmwareProcess) {
+        uploadElrsFirmwareProcess.kill();
+        uploadElrsFirmwareProcess = null;
+        log.debug("\'uploadElrsFirmwareProcess\' successfully killed!")
+    }
 }
 
 // Kill all processes before quit application
