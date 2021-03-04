@@ -241,8 +241,7 @@ function runScript(command, args, callback, errCallback) {
     // fetch error
     child.on('error', (error) => {
         // log error data
-        error = error.toString();
-        log.error(error);
+        log.error(error.toString().trim());
 
         // TODO: show more cool-looking notifications
         // dialog.showMessageBox({
@@ -261,16 +260,14 @@ function runScript(command, args, callback, errCallback) {
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (data) => {
         // log stdout data
-        data = data.toString();
-        log.info(data);
+        log.info(data.toString().trim());
     });
 
     // fetch stderr
     child.stderr.setEncoding('utf8');
     child.stderr.on('data', (data) => {
         // log stderr data
-        data = data.toString();
-        log.error(data);
+        log.error(data.toString().trim());
 
         // TODO: show more cool - looking notifications
         // dialog.showMessageBox({
