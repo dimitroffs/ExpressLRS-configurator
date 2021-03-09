@@ -304,12 +304,12 @@ ipcRenderer.on('update-elrs-branches', () => {
     ipcRenderer.invoke('update-elrs-branches-clicked')
 });
 
-ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches) => {
+ipcRenderer.on('update-elrs-branches-success', (e, fetchedElrsRemoteBranches, currentRemoteBranch) => {
     successElrsStatusMsg("Successfully fetched remote ExpressLRS branches");
 
     elrsBranchesSelect.innerHTML = "";
 
-    updateElrsRemoteBranches(fetchedElrsRemoteBranches);
+    updateElrsRemoteBranches(fetchedElrsRemoteBranches, currentRemoteBranch);
 });
 
 ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) => {
@@ -350,7 +350,7 @@ function errorElrsStatusMsg(msg) {
     elrsRepoStatusSpan.innerHTML = msg;
 }
 
-function updateElrsRemoteBranches(fetchedRemoteBranches) {
+function updateElrsRemoteBranches(fetchedRemoteBranches, currentRemoteBranch) {
     var fragment = document.createDocumentFragment();
 
     // apply to branches select component
@@ -363,7 +363,7 @@ function updateElrsRemoteBranches(fetchedRemoteBranches) {
     });
 
     elrsBranchesSelect.appendChild(fragment);
-    elrsBranchesSelect.value = "origin/master";
+    elrsBranchesSelect.value = currentRemoteBranch;
 }
 
 function updateElrsBuildTargets(fetchedPioBuildTargets) {

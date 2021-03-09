@@ -58,8 +58,7 @@ logger = logging.getLogger('elrs-cli')
 # Initialize argument parser for ExpressLRS CLI
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--clone", action="store_true", help="clone ExpressLRS GitHub repository locally")
-parser.add_argument("-p", "--pull", action="store_true",
-                    help="pull latest changes locally from ExpressLRS GitHub repository master branch")
+parser.add_argument("-p", "--pull", type=str, help="pull latest changes locally from ExpressLRS GitHub repository master branch")
 parser.add_argument("-r", "--reset", type=str, help="reset ExpressLRS to specific branch")
 parser.add_argument("-t", "--target", type=str, help="specify ExpressLRS build/upload target for PlatformIO")
 parser.add_argument("-b", "--build", action="store_true", help="build ExpressLRS firmware for specified target")
@@ -77,21 +76,28 @@ def cloneElrsGithubRepo():
     
     subprocess.check_call(['git', 'sparse-checkout', 'init', '--cone'])
     subprocess.check_call(['git', 'sparse-checkout', 'set', 'src'])
-    subprocess.check_call(['git', 'config', 'pull.rebase', 'true'])
+    subprocess.check_call(['git', 'config', 'pull.rebase', 'false'])
+    subprocess.check_call(['git', 'fetch', '--all'])
+    subprocess.check_call(['git', 'fetch', '--tags'])
 
     logger.debug("Successfully cloned latest ExpressLRS changes from GitHub repository 'master' branch")
 
 
 # Github pull latest ExpressLRS repository master branch function
-def pullElrsGithubRepo():
-    logger.debug("Pulling latest ExpressLRS changes from GitHub repository 'master' branch")
+def pullElrsGithubRepo(branch):
+    logger.debug("Fetching latest ExpressLRS changes from GitHub repository")
     
     os.chdir(ELRS_REPO_DIR)
 
     subprocess.check_call(['git', '--version'])
-    subprocess.check_call(['git', 'pull'])
+    subprocess.check_call(['git', 'fetch', '--all'])
+    subprocess.check_call(['git', 'fetch', '--tags'])
 
-    logger.debug("Successfully got latest ExpressLRS changes from GitHub repository 'master' branch")
+    logger.debug(f"Pulling latest ExpressLRS changes from GitHub repository {branch} branch")
+
+    subprocess.check_call(['git', 'merge', f'origin/{branch}'])
+
+    logger.debug(f"Successfully got latest ExpressLRS changes from GitHub repository {branch} branch")
 
 
 # Reset current ExpressLRS local repository to specific branch
@@ -101,7 +107,7 @@ def resetElrsLocalRepositoryToBranch(branch):
     os.chdir(ELRS_REPO_DIR)
 
     subprocess.check_call(['git', '--version'])
-    subprocess.check_call(['git', 'reset', '--hard', branch])
+    subprocess.check_call(['git', 'reset', '--hard', 'origin/' + branch])
 
     logger.info(f"Successfully reset ExpressLRS local repository to remote '{branch}' branch")
 
@@ -134,7 +140,8 @@ if args.clone:
     sys.exit(0)
 
 if args.pull:
-    pullElrsGithubRepo()
+    branch = args.pull
+    pullElrsGithubRepo(branch)
     sys.exit(0)
 
 if args.reset:
