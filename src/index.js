@@ -647,6 +647,9 @@ function startElrsConfigurator() {
 
     // fetch latest ExpressLRS branches
     listElrsBranches();
+
+    // fetch latest PlatformIO build targets
+    listElrsBuildTargets();
 }
 
 function listElrsBranches() {
@@ -660,13 +663,10 @@ function listElrsBranches() {
 
     // update local ExpressLRS branches select component, keeping remote branches for select
     mainWindow.webContents.send('update-elrs-branches-success', parsedElrsRemotes, currentRemote);
-
-    // fetch latest PlatformIO build targets
-    updateElrsBuildTargets();
 }
 
 // fetch latest PlatformIO build targets from platformio.ini
-function updateElrsBuildTargets() {
+function listElrsBuildTargets() {
     let fetchedPioBuildTargets = [];
 
     const readInterface = readline.createInterface({
@@ -726,6 +726,9 @@ function resetElrsBranchSuccess() {
 
     // send event for successfully finished target build
     mainWindow.webContents.send('elrs-reset-branch-success')
+
+    // fetch latest PlatformIO build targets
+    listElrsBuildTargets();
 }
 
 function resetElrsBranchFailed() {
