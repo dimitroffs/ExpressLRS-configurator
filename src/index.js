@@ -460,7 +460,7 @@ function cloneExpressLRS() {
         });
     } else {
         log.info("Found local ExpressLRS repository");
-        getCurrentRemoteBranch();
+        updateAndGetCurrentRemoteBranch();
     }
 }
 
@@ -468,7 +468,7 @@ let cloneExpressLRSProcess = null
 
 function cloneWinExpressLRS() {
     // clone ExpressLRS using embedded Python on Windows
-    cloneExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -c\"\""], getCurrentRemoteBranch);
+    cloneExpressLRSProcess = runScript("cmd", ["/C \"\"" + winDirPythonEmbedded + "\" \"" + srcDir + "elrs-cli/elrs-cli.py\" -c\"\""], updateAndGetCurrentRemoteBranch);
 }
 
 function cloneLinuxExpressLRS() {}
@@ -481,9 +481,6 @@ let localFetchedElrsTags = new Map();
 let currentRemote = null;
 
 function getCurrentRemoteBranch() {
-    // update local branches map
-    updateLocalBranchesMap();
-
     let currentHeadCommit;
 
     const readInterface = readline.createInterface({
@@ -516,15 +513,15 @@ function getCurrentRemoteBranch() {
 }
 
 // fetch latest locally updated remotes either from .git/packet-refs or from ./git/FETCH_HEAD file
-function updateLocalBranchesMap() {
+function updateAndGetCurrentRemoteBranch() {
     if (!localFileExists(fetchHeadPath)) {
-        parseInitialLocalBranches();
+        parseInitialLocalBranches(getCurrentRemoteBranch);
     } else {
-        parseLocalBranchesAfterFetch();
+        parseLocalBranchesAfterFetch(getCurrentRemoteBranch);
     }
 }
 
-function parseInitialLocalBranches() {
+function parseInitialLocalBranches(callback) {
     log.info("Parsing local branches from packed-refs")
 
     const readInterface = readline.createInterface({
@@ -562,10 +559,15 @@ function parseInitialLocalBranches() {
 
     readInterface.on('close', function(line) {
         log.debug('Successfully updated ExpressLRS initial local branches mappings');
+
+        // run success callback function
+        if (typeof callback === 'function') {
+            callback();
+        }
     });
 }
 
-function parseLocalBranchesAfterFetch() {
+function parseLocalBranchesAfterFetch(callback) {
     log.info("Parsing local branches from FETCH_HEAD")
 
     const readInterface = readline.createInterface({
@@ -606,6 +608,11 @@ function parseLocalBranchesAfterFetch() {
 
     readInterface.on('close', function(line) {
         log.debug('Successfully updated ExpressLRS local branches mappings after Git fetch');
+
+        // run success callback function
+        if (typeof callback === 'function') {
+            callback();
+        }
     });
 }
 
@@ -646,14 +653,15 @@ function startElrsConfigurator() {
     setupUpdateWindow.hide();
 
     // fetch latest ExpressLRS branches
-    listElrsBranches();
+    //listElrsBranches();
+    parseLocalBranchesAfterFetch(listElrsBranches);
 
     // fetch latest PlatformIO build targets
     listElrsBuildTargets();
 }
 
 function listElrsBranches() {
-    updateLocalBranchesMap()
+    //updateLocalBranchesMap()
 
     let parsedElrsBranches = Array.from(localFetchedElrsBranches.values()).sort();
     let parsedElrsTags = Array.from(localFetchedElrsTags.values()).sort();
