@@ -6,6 +6,7 @@ const Tail = require('tail').Tail;
 // html dom constants
 const elrsRepoStatusSpinner = document.getElementById('elrs-repo-status-spinner');
 const elrsRepoStatusSpan = document.getElementById('elrs-repo-status');
+const elrsUsbStatusSpan = document.getElementById('elrs-usb-status');
 const logArea = document.getElementById('log-area');
 const logAreaText = document.getElementById('log-area-text');
 const elrsBranchesSelect = document.getElementById('elrs-remote-branches');
@@ -324,6 +325,16 @@ ipcRenderer.on('update-elrs-build-targets-success', (e, fetchedPioBuldTargets) =
 ipcRenderer.on('version', (e, appVersion) => {
     // fetch and set configurator version
     document.getElementById('app-version-span').innerText = appVersion;
+});
+
+ipcRenderer.on('usb-connected', (e, portPath) => {
+    // change span message
+    elrsUsbStatusSpan.innerHTML = 'USB device connected on port: ' + portPath;
+});
+
+ipcRenderer.on('usb-disconnected', () => {
+    // change span message
+    elrsUsbStatusSpan.innerHTML = 'USB device disconnected';
 });
 
 function startElrsStatusMsg(msg) {

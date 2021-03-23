@@ -6,6 +6,33 @@ const menu = require('./menu')
 const { spawn } = require('child_process')
 const log = require('electron-log');
 const os = require('os');
+const usb = require('usb')
+const serialport = require('serialport');
+
+
+// usb devices integration
+let portPath = null;
+usb.on('attach', function(device) {
+    // list serial ports
+    serialport.list().then(ports => {
+        ports.forEach(function(port) {
+            // fetch first connected serial port
+            portPath = port.path;
+            log.info("USB device connected on port: " + portPath);
+
+            // send changes to renderer
+            mainWindow.webContents.send('usb-connected', portPath);
+        });
+    });
+});
+
+usb.on('detach', function(device) {
+    log.info("USB device disconnected on port: " + portPath);
+
+    // send changes to renderer
+    mainWindow.webContents.send('usb-disconnected');
+});
+// end of usb devices integration
 
 // list of used platforms
 const platforms = {
@@ -653,7 +680,6 @@ function startElrsConfigurator() {
     setupUpdateWindow.hide();
 
     // fetch latest ExpressLRS branches
-    //listElrsBranches();
     parseLocalBranchesAfterFetch(listElrsBranches);
 
     // fetch latest PlatformIO build targets
